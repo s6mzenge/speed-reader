@@ -1,4 +1,30 @@
-<!DOCTYPE html>
+/* Select styling */
+        select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        select:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+
+        select option {
+            background: #333;
+            color: white;
+        }<!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
@@ -383,6 +409,89 @@
             z-index: 1;
         }
 
+        /* Bionic Reading Styles */
+        .bionic-bold {
+            font-weight: 900;
+            color: var(--text-primary);
+        }
+
+        .bionic-regular {
+            font-weight: 400;
+            opacity: 0.9;
+        }
+
+        /* Peripheral Hint */
+        .peripheral-word {
+            position: absolute;
+            top: 50%;
+            right: -200px;
+            transform: translateY(-50%);
+            opacity: 0.15;
+            font-size: 0.8em;
+            color: var(--text-secondary);
+            transition: opacity 0.3s ease;
+        }
+
+        /* Reading mode indicators */
+        .mode-indicator {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 5px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            display: none;
+        }
+
+        .mode-indicator.active {
+            display: block;
+        }
+
+        /* Warm-up indicator */
+        .warmup-indicator {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--success-color);
+            font-size: 0.9em;
+            animation: pulse 1s infinite;
+        }
+
+        /* Session stats */
+        .session-stats {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 15px;
+            display: none;
+            z-index: 100;
+        }
+
+        .session-stats.active {
+            display: block;
+        }
+
+        .session-stat {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            font-size: 0.9em;
+            color: var(--text-secondary);
+        }
+
+        .session-stat-value {
+            color: var(--text-primary);
+            font-weight: bold;
+        }
+
         @keyframes letterGlow {
             from { text-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
             to { text-shadow: 0 0 40px rgba(255, 215, 0, 1); }
@@ -586,6 +695,34 @@
             cursor: pointer;
             font-size: 12px;
             z-index: 1000;
+        }
+
+        /* Select styling */
+        select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        select:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+
+        select option {
+            background: #333;
+            color: white;
         }
 
         /* Chapter selection modal */
@@ -830,9 +967,73 @@
                     Fixiert den optimalen Erkennungspunkt jedes Wortes an derselben Position für schnelleres Lesen
                 </div>
             </div>
+
+            <div class="control-group">
+                <label for="reading-mode">
+                    Lese-Modus
+                    <span class="value-display" id="mode-value">Normal</span>
+                </label>
+                <select id="reading-mode" style="width: 100%; padding: 8px; border-radius: 8px; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2);">
+                    <option value="normal">Normal - Ausgeglichenes Tempo</option>
+                    <option value="study">Study - Langsamer mit mehr Pausen</option>
+                    <option value="skim">Skim - Schnelles Überfliegen</option>
+                    <option value="technical">Technical - Für Fachtexte</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="adaptive-speed">
+                    Adaptive Geschwindigkeit
+                    <input type="checkbox" id="adaptive-speed" checked style="margin-left: 10px; width: 20px; height: 20px; cursor: pointer;">
+                </label>
+                <div style="font-size: 0.9em; color: var(--text-secondary); margin-top: 5px;">
+                    Passt Geschwindigkeit automatisch an Wortkomplexität an
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label for="smart-pauses">
+                    Intelligente Pausen
+                    <input type="checkbox" id="smart-pauses" checked style="margin-left: 10px; width: 20px; height: 20px; cursor: pointer;">
+                </label>
+                <div style="font-size: 0.9em; color: var(--text-secondary); margin-top: 5px;">
+                    Automatische Mikropausen nach Satzzeichen
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label for="bionic-reading">
+                    Bionic Reading
+                    <input type="checkbox" id="bionic-reading" style="margin-left: 10px; width: 20px; height: 20px; cursor: pointer;">
+                </label>
+                <div style="font-size: 0.9em; color: var(--text-secondary); margin-top: 5px;">
+                    Betont Wortanfänge für schnellere Erkennung
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label for="peripheral-hint">
+                    Peripheres Priming
+                    <input type="checkbox" id="peripheral-hint" style="margin-left: 10px; width: 20px; height: 20px; cursor: pointer;">
+                </label>
+                <div style="font-size: 0.9em; color: var(--text-secondary); margin-top: 5px;">
+                    Zeigt nächstes Wort leicht transparent an
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label for="metronome">
+                    Metronom (Subvokalisation reduzieren)
+                    <input type="checkbox" id="metronome" style="margin-left: 10px; width: 20px; height: 20px; cursor: pointer;">
+                </label>
+                <div style="font-size: 0.9em; color: var(--text-secondary); margin-top: 5px;">
+                    Rhythmischer Ton verhindert inneres Mitsprechen
+                </div>
+            </div>
         </div>
 
         <div class="reader-display" id="reader-display">
+            <div class="mode-indicator" id="mode-indicator"></div>
             <div class="orp-marker" id="orp-marker"></div>
             <div class="word-display" id="word-display">Bereit zum Starten...</div>
         </div>
@@ -931,6 +1132,19 @@
         let selectedChapters = []; // Store selected chapter indices
         let selectionMode = 'all'; // 'all', 'single', 'multiple'
         let useORP = true; // ORP-Fixierung ein/aus
+        
+        // Neue Features
+        let readingMode = 'normal'; // 'normal', 'study', 'skim', 'technical'
+        let adaptiveSpeed = true; // Adaptive Geschwindigkeit
+        let useSmartPauses = true; // Intelligente Pausen
+        let useBionicReading = false; // Bionic Reading
+        let usePeripheralHint = false; // Peripheres Priming
+        let useMetronome = false; // Metronom für Subvokalisations-Unterdrückung
+        let warmupActive = false; // Warm-up Phase
+        let currentSpeed = wordsPerMinute; // Aktuelle Geschwindigkeit (kann variieren)
+        let metronomeAudio = null; // Metronom Audio-Objekt
+        let sessionStartTime = null; // Session-Start für Statistiken
+        let totalWordsRead = 0; // Gesamtzahl gelesener Wörter in Session
 
         // DOM elements
         const fileInput = document.getElementById('file-input');
@@ -1380,6 +1594,17 @@
                 orpMarker.style.display = useORP ? 'block' : 'none';
             }
 
+            // Zeige Modus-Indikator
+            const modeIndicator = document.getElementById('mode-indicator');
+            if (modeIndicator && readingMode !== 'normal') {
+                modeIndicator.textContent = `Modus: ${readingMode.charAt(0).toUpperCase() + readingMode.slice(1)}`;
+                modeIndicator.classList.add('active');
+            }
+
+            // Reset Session Stats
+            sessionStartTime = null;
+            totalWordsRead = 0;
+
             totalWordsStat.textContent = words.length.toLocaleString();
             currentWpmStat.textContent = wordsPerMinute;
             updateStats();
@@ -1567,6 +1792,15 @@
             currentIndex = 0;
             displayWord();
             playPauseBtn.textContent = '▶️ START';
+            
+            // Reset Session Stats
+            sessionStartTime = null;
+            totalWordsRead = 0;
+            const statsDiv = document.getElementById('session-stats');
+            if (statsDiv) {
+                statsDiv.classList.remove('active');
+            }
+            
             debugLog('Position zurückgesetzt');
         });
 
@@ -1585,9 +1819,10 @@
             speedValue.textContent = `${wordsPerMinute} WPM`;
             currentWpmStat.textContent = wordsPerMinute;
             
+            // Restart mit neuer Geschwindigkeit wenn am Spielen
             if (isPlaying) {
-                pause();
-                play();
+                clearTimeout(intervalId);
+                playNextWord();
             }
             
             updateStats();
@@ -1597,9 +1832,10 @@
             wordsPerChunk = parseInt(e.target.value);
             chunkValue.textContent = wordsPerChunk;
             
+            // Restart mit neuer Chunk-Größe wenn am Spielen
             if (isPlaying) {
-                pause();
-                play();
+                clearTimeout(intervalId);
+                playNextWord();
             } else {
                 displayWord();
             }
@@ -1627,6 +1863,69 @@
             }
             
             debugLog(`ORP-Fixierung ${useORP ? 'aktiviert' : 'deaktiviert'}`);
+        });
+
+        // Neue Feature Controls
+        const readingModeSelect = document.getElementById('reading-mode');
+        const modeValue = document.getElementById('mode-value');
+        const adaptiveSpeedToggle = document.getElementById('adaptive-speed');
+        const smartPausesToggle = document.getElementById('smart-pauses');
+        const bionicReadingToggle = document.getElementById('bionic-reading');
+        const peripheralHintToggle = document.getElementById('peripheral-hint');
+        const metronomeToggle = document.getElementById('metronome');
+
+        readingModeSelect.addEventListener('change', (e) => {
+            readingMode = e.target.value;
+            modeValue.textContent = e.target.options[e.target.selectedIndex].text.split(' - ')[0];
+            debugLog(`Lese-Modus geändert zu: ${readingMode}`);
+            
+            // Passe Geschwindigkeit an Modus an
+            if (isPlaying) {
+                pause();
+                play();
+            }
+        });
+
+        adaptiveSpeedToggle.addEventListener('change', (e) => {
+            adaptiveSpeed = e.target.checked;
+            debugLog(`Adaptive Geschwindigkeit ${adaptiveSpeed ? 'aktiviert' : 'deaktiviert'}`);
+        });
+
+        smartPausesToggle.addEventListener('change', (e) => {
+            useSmartPauses = e.target.checked;
+            debugLog(`Intelligente Pausen ${useSmartPauses ? 'aktiviert' : 'deaktiviert'}`);
+        });
+
+        bionicReadingToggle.addEventListener('change', (e) => {
+            useBionicReading = e.target.checked;
+            debugLog(`Bionic Reading ${useBionicReading ? 'aktiviert' : 'deaktiviert'}`);
+            
+            // Update Anzeige wenn nicht am Spielen
+            if (!isPlaying && words.length > 0) {
+                displayWord();
+            }
+        });
+
+        peripheralHintToggle.addEventListener('change', (e) => {
+            usePeripheralHint = e.target.checked;
+            debugLog(`Peripheres Priming ${usePeripheralHint ? 'aktiviert' : 'deaktiviert'}`);
+            
+            if (!usePeripheralHint) {
+                hidePeripheralHint();
+            } else if (!isPlaying && words.length > 0) {
+                displayWord();
+            }
+        });
+
+        metronomeToggle.addEventListener('change', (e) => {
+            useMetronome = e.target.checked;
+            debugLog(`Metronom ${useMetronome ? 'aktiviert' : 'deaktiviert'}`);
+            
+            if (isPlaying) {
+                if (useMetronome) {
+                    startMetronome();
+                }
+            }
         });
 
         // Keyboard shortcuts
@@ -1658,8 +1957,8 @@
                     currentWpmStat.textContent = wordsPerMinute;
                     updateSliderBackground(speedSlider);
                     if (isPlaying) {
-                        pause();
-                        play();
+                        clearTimeout(intervalId);
+                        playNextWord();
                     }
                     break;
                 case 'ArrowDown':
@@ -1670,8 +1969,8 @@
                     currentWpmStat.textContent = wordsPerMinute;
                     updateSliderBackground(speedSlider);
                     if (isPlaying) {
-                        pause();
-                        play();
+                        clearTimeout(intervalId);
+                        playNextWord();
                     }
                     break;
             }
