@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speed Reader - PDF & EPUB</title>
+    
+    <!-- External Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/epubjs@0.3.93/dist/epub.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 900px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .upload-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 2px dashed #dee2e6;
+            transition: all 0.3s ease;
+        }
+
+        .upload-section.drag-over {
+            border-color: #667eea;
+            background: #f0f3ff;
+            transform: scale(1.02);
+        }
+
+        .file-input-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .file-input-label {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .file-input-label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-info {
+            text-align: center;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .controls {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            display: none;
+        }
+
+        .controls.active {
+            display: block;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 10px;
+            background: #dee2e6;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .value-display {
+            display: inline-block;
+            margin-left: 10px;
+            padding: 5px 15px;
+            background: #667eea;
+            color: white;
+            border-radius: 20px;
+            font-weight: bold;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .reader-display {
+            background: #1a1a2e;
+            border-radius: 15px;
+            padding: 60px 40px;
+            margin-bottom: 30px;
+            min-height: 200px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .reader-display.active {
+            display: flex;
+        }
+
+        #word-display {
+            font-size: 4em;
+            color: white;
+            font-weight: 300;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        .focus-letter {
+            color: #ffd700;
+            font-weight: 600;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 30px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        button.primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #dee2e6;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .loading.active::after {
+            content: '...';
+            animation: pulse 1.5s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚡ Speed Reader</h1>
+        
+        <div class="upload-section" id="upload-section">
+            <div class="file-input-wrapper">
+                <label for="file-input" class="file-input-label">
+                    📚 PDF oder EPUB auswählen
+                </label>
+                <input type="file" id="file-input" accept=".pdf,.epub">
+                <div class="file-info">
+                    Oder Datei hier hineinziehen
+                </div>
+            </div>
+        </div>
+
+        <div class="loading" id="loading">
+            Datei wird verarbeitet
+        </div>
+
+        <div class="controls" id="controls">
+            <div class="control-group">
+                <label for="speed-slider">
+                    Lesegeschwindigkeit (Wörter pro Minute)
+                    <span class="value-display" id="speed-value">300 WPM</span>
+                </label>
+                <input type="range" id="speed-slider" min="100" max="1000" value="300" step="50">
+            </div>
+
+            <div class="control-group">
+                <label for="chunk-slider">
+                    Wörter pro Anzeige
+                    <span class="value-display" id="chunk-value">1</span>
+                </label>
+                <input type="range" id="chunk-slider" min="1" max="5" value="1">
+            </div>
+
+            <div class="control-group">
+                <label for="font-slider">
+                    Schriftgröße
+                    <span class="value-display" id="font-value">4em</span>
+                </label>
+                <input type="range" id="font-slider" min="2" max="8" value="4" step="0.5">
+            </div>
+        </div>
+
+        <div class="reader-display" id="reader-display">
+            <div id="word-display">Bereit zum Lesen</div>
+        </div>
+
+        <div class="button-group" id="button-group" style="display: none;">
+            <button id="play-pause-btn" class="primary">▶️ Start</button>
+            <button id="reset-btn">⏮️ Neustart</button>
+            <button id="skip-back-btn">⏪ -10 Wörter</button>
+            <button id="skip-forward-btn">⏩ +10 Wörter</button>
+        </div>
+
+        <div class="progress-bar" id="progress-bar" style="display: none;">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+
+        <div class="stats" id="stats" style="display: none;">
+            <div class="stat-item">
+                <div class="stat-value" id="words-read">0</div>
+                <div class="stat-label">Wörter gelesen</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="total-words">0</div>
+                <div class="stat-label">Gesamt</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="time-remaining">0:00</div>
+                <div class="stat-label">Verbleibende Zeit</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set PDF.js worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        // Global variables
+        let words = [];
+        let currentIndex = 0;
+        let isPlaying = false;
+        let intervalId = null;
+        let wordsPerMinute = 300;
+        let wordsPerChunk = 1;
+
+        // DOM elements
+        const fileInput = document.getElementById('file-input');
+        const uploadSection = document.getElementById('upload-section');
+        const controls = document.getElementById('controls');
+        const readerDisplay = document.getElementById('reader-display');
+        const wordDisplay = document.getElementById('word-display');
+        const buttonGroup = document.getElementById('button-group');
+        const playPauseBtn = document.getElementById('play-pause-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const skipBackBtn = document.getElementById('skip-back-btn');
+        const skipForwardBtn = document.getElementById('skip-forward-btn');
+        const speedSlider = document.getElementById('speed-slider');
+        const speedValue = document.getElementById('speed-value');
+        const chunkSlider = document.getElementById('chunk-slider');
+        const chunkValue = document.getElementById('chunk-value');
+        const fontSlider = document.getElementById('font-slider');
+        const fontValue = document.getElementById('font-value');
+        const progressBar = document.getElementById('progress-bar');
+        const progressFill = document.getElementById('progress-fill');
+        const stats = document.getElementById('stats');
+        const wordsReadStat = document.getElementById('words-read');
+        const totalWordsStat = document.getElementById('total-words');
+        const timeRemainingStat = document.getElementById('time-remaining');
+        const loading = document.getElementById('loading');
+
+        // Drag and drop
+        uploadSection.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadSection.classList.add('drag-over');
+        });
+
+        uploadSection.addEventListener('dragleave', () => {
+            uploadSection.classList.remove('drag-over');
+        });
+
+        uploadSection.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadSection.classList.remove('drag-over');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        // File input change
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        // Handle file upload
+        async function handleFile(file) {
+            const fileType = file.name.split('.').pop().toLowerCase();
+            
+            loading.classList.add('active');
+            
+            try {
+                if (fileType === 'pdf') {
+                    await processPDF(file);
+                } else if (fileType === 'epub') {
+                    await processEPUB(file);
+                } else {
+                    alert('Bitte wählen Sie eine PDF- oder EPUB-Datei aus.');
+                    loading.classList.remove('active');
+                    return;
+                }
+                
+                initializeReader();
+            } catch (error) {
+                console.error('Fehler beim Verarbeiten der Datei:', error);
+                alert('Fehler beim Laden der Datei. Bitte versuchen Sie es erneut.');
+            } finally {
+                loading.classList.remove('active');
+            }
+        }
+
+        // Process PDF
+        async function processPDF(file) {
+            const arrayBuffer = await file.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+            let fullText = '';
+
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const textContent = await page.getTextContent();
+                const pageText = textContent.items.map(item => item.str).join(' ');
+                fullText += pageText + ' ';
+            }
+
+            words = fullText.split(/\s+/).filter(word => word.length > 0);
+        }
+
+        // Process EPUB
+        async function processEPUB(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                
+                reader.onload = async function(e) {
+                    try {
+                        const book = ePub(e.target.result);
+                        
+                        await book.ready;
+                        
+                        const spine = await book.loaded.spine;
+                        let fullText = '';
+                        
+                        for (let item of spine.items) {
+                            const doc = await book.load(item.href);
+                            const textContent = doc.innerText || doc.textContent || '';
+                            fullText += textContent + ' ';
+                        }
+                        
+                        words = fullText.split(/\s+/).filter(word => word.length > 0);
+                        resolve();
+                    } catch (error) {
+                        reject(error);
+                    }
+                };
+                
+                reader.onerror = reject;
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        // Initialize reader
+        function initializeReader() {
+            if (words.length === 0) {
+                alert('Keine Wörter gefunden.');
+                return;
+            }
+
+            controls.classList.add('active');
+            readerDisplay.classList.add('active');
+            buttonGroup.style.display = 'flex';
+            progressBar.style.display = 'block';
+            stats.style.display = 'flex';
+
+            totalWordsStat.textContent = words.length;
+            updateStats();
+            displayWord();
+        }
+
+        // Display word with focus letter
+        function displayWord() {
+            if (currentIndex >= words.length) {
+                stop();
+                return;
+            }
+
+            const chunk = [];
+            for (let i = 0; i < wordsPerChunk && currentIndex + i < words.length; i++) {
+                chunk.push(words[currentIndex + i]);
+            }
+
+            const text = chunk.join(' ');
+            
+            // Apply focus letter highlighting (ORP - Optimal Recognition Point)
+            if (wordsPerChunk === 1 && text.length > 1) {
+                const focusIndex = Math.floor(text.length * 0.3);
+                const highlighted = text.substring(0, focusIndex) + 
+                    '<span class="focus-letter">' + text[focusIndex] + '</span>' + 
+                    text.substring(focusIndex + 1);
+                wordDisplay.innerHTML = highlighted;
+            } else {
+                wordDisplay.textContent = text;
+            }
+
+            updateStats();
+        }
+
+        // Update statistics
+        function updateStats() {
+            wordsReadStat.textContent = currentIndex;
+            
+            const wordsRemaining = words.length - currentIndex;
+            const minutesRemaining = wordsRemaining / wordsPerMinute;
+            const minutes = Math.floor(minutesRemaining);
+            const seconds = Math.floor((minutesRemaining - minutes) * 60);
+            timeRemainingStat.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            const progress = (currentIndex / words.length) * 100;
+            progressFill.style.width = `${progress}%`;
+        }
+
+        // Play/Pause
+        function play() {
+            if (currentIndex >= words.length) {
+                currentIndex = 0;
+            }
+
+            isPlaying = true;
+            playPauseBtn.textContent = '⏸️ Pause';
+            
+            const interval = (60 * 1000) / (wordsPerMinute / wordsPerChunk);
+            
+            intervalId = setInterval(() => {
+                currentIndex += wordsPerChunk;
+                if (currentIndex >= words.length) {
+                    stop();
+                } else {
+                    displayWord();
+                }
+            }, interval);
+
+            displayWord();
+        }
+
+        function pause() {
+            isPlaying = false;
+            playPauseBtn.textContent = '▶️ Weiter';
+            clearInterval(intervalId);
+        }
+
+        function stop() {
+            isPlaying = false;
+            playPauseBtn.textContent = '▶️ Start';
+            clearInterval(intervalId);
+            
+            if (currentIndex >= words.length) {
+                wordDisplay.textContent = 'Fertig! 🎉';
+                currentIndex = words.length;
+                updateStats();
+            }
+        }
+
+        // Event listeners
+        playPauseBtn.addEventListener('click', () => {
+            if (isPlaying) {
+                pause();
+            } else {
+                play();
+            }
+        });
+
+        resetBtn.addEventListener('click', () => {
+            pause();
+            currentIndex = 0;
+            displayWord();
+            playPauseBtn.textContent = '▶️ Start';
+        });
+
+        skipBackBtn.addEventListener('click', () => {
+            currentIndex = Math.max(0, currentIndex - 10);
+            displayWord();
+        });
+
+        skipForwardBtn.addEventListener('click', () => {
+            currentIndex = Math.min(words.length - 1, currentIndex + 10);
+            displayWord();
+        });
+
+        speedSlider.addEventListener('input', (e) => {
+            wordsPerMinute = parseInt(e.target.value);
+            speedValue.textContent = `${wordsPerMinute} WPM`;
+            
+            if (isPlaying) {
+                pause();
+                play();
+            }
+            
+            updateStats();
+        });
+
+        chunkSlider.addEventListener('input', (e) => {
+            wordsPerChunk = parseInt(e.target.value);
+            chunkValue.textContent = wordsPerChunk;
+            
+            if (isPlaying) {
+                pause();
+                play();
+            } else {
+                displayWord();
+            }
+        });
+
+        fontSlider.addEventListener('input', (e) => {
+            const size = e.target.value;
+            fontValue.textContent = `${size}em`;
+            wordDisplay.style.fontSize = `${size}em`;
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (!words.length) return;
+
+            switch(e.key) {
+                case ' ':
+                    e.preventDefault();
+                    if (isPlaying) {
+                        pause();
+                    } else {
+                        play();
+                    }
+                    break;
+                case 'ArrowLeft':
+                    currentIndex = Math.max(0, currentIndex - 10);
+                    displayWord();
+                    break;
+                case 'ArrowRight':
+                    currentIndex = Math.min(words.length - 1, currentIndex + 10);
+                    displayWord();
+                    break;
+                case 'ArrowUp':
+                    speedSlider.value = Math.min(1000, parseInt(speedSlider.value) + 50);
+                    speedSlider.dispatchEvent(new Event('input'));
+                    break;
+                case 'ArrowDown':
+                    speedSlider.value = Math.max(100, parseInt(speedSlider.value) - 50);
+                    speedSlider.dispatchEvent(new Event('input'));
+                    break;
+            }
+        });
+    </script>
+</body>
+</html>
