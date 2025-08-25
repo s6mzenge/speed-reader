@@ -80,7 +80,7 @@
 
         @keyframes float {
             from {
-                transform: translateY(100vh) translateX(0) scale(0);
+                transform: translateY(100vh) translateX(0);
                 opacity: 0;
             }
             10% {
@@ -90,33 +90,56 @@
                 opacity: 1;
             }
             to {
-                transform: translateY(-100vh) translateX(100px) scale(1.5);
+                transform: translateY(-100vh) translateX(100px);
                 opacity: 0;
             }
         }
 
-        .container {
+        /* Theme toggle button */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
             background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 30px;
-            border: 1px solid var(--glass-border);
-            box-shadow: 
-                0 25px 50px -12px rgba(0, 0, 0, 0.25),
-                0 0 100px rgba(102, 126, 234, 0.1),
-                inset 0 0 30px rgba(255, 255, 255, 0.05);
-            padding: 50px;
-            max-width: 1000px;
-            width: 100%;
-            position: relative;
-            z-index: 10;
-            animation: slideUp 0.8s ease-out;
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.5em;
+            z-index: 1000;
+            transition: all 0.3s ease;
         }
 
-        @keyframes slideUp {
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            border: 1px solid var(--glass-border);
+            padding: 50px;
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.3),
+                inset 0 0 100px rgba(255, 255, 255, 0.05);
+            z-index: 10;
+            position: relative;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
             from {
                 opacity: 0;
-                transform: translateY(50px);
+                transform: translateY(30px);
             }
             to {
                 opacity: 1;
@@ -127,59 +150,31 @@
         h1 {
             text-align: center;
             color: var(--text-primary);
+            font-size: 3em;
             margin-bottom: 40px;
-            font-size: 3.5em;
-            font-weight: 900;
-            letter-spacing: -2px;
-            position: relative;
-            text-shadow: 0 0 30px rgba(102, 126, 234, 0.5);
-            animation: glow 2s ease-in-out infinite alternate;
-        }
-
-        @keyframes glow {
-            from { text-shadow: 0 0 30px rgba(102, 126, 234, 0.5); }
-            to { text-shadow: 0 0 40px rgba(102, 126, 234, 0.8), 0 0 60px rgba(102, 126, 234, 0.4); }
+            text-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
         }
 
         .emoji-icon {
-            display: inline-block;
-            animation: bounce 2s infinite;
+            animation: pulse 2s infinite;
         }
 
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
         }
 
-        /* Theme toggle */
-        .theme-toggle {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 50px;
-            padding: 10px 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            color: var(--text-primary);
-            font-size: 1.5em;
-            z-index: 100;
-        }
-
-        .theme-toggle:hover {
-            transform: scale(1.1) rotate(10deg);
-            box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
-        }
-
-        /* Upload section with animation */
         .upload-section {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-            border-radius: 25px;
-            padding: 40px;
-            margin-bottom: 30px;
-            border: 2px dashed rgba(255, 255, 255, 0.3);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            padding: 60px;
+            border: 3px dashed var(--glass-border);
+            border-radius: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.05);
             position: relative;
             overflow: hidden;
         }
@@ -192,7 +187,7 @@
             width: 200%;
             height: 200%;
             background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-            animation: rotate 10s linear infinite;
+            animation: rotate 20s linear infinite;
             pointer-events: none;
         }
 
@@ -202,330 +197,208 @@
         }
 
         .upload-section.drag-over {
-            transform: scale(1.05);
             border-color: var(--accent-color);
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 255, 255, 0.05));
-            box-shadow: 0 0 50px rgba(255, 215, 0, 0.3);
+            background: rgba(255, 215, 0, 0.1);
+            transform: scale(1.05);
         }
 
         .file-input-label {
             display: inline-block;
-            padding: 18px 40px;
+            padding: 15px 40px;
             background: var(--primary-gradient);
             color: white;
             border-radius: 50px;
+            font-size: 1.2em;
+            font-weight: bold;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            font-weight: 700;
-            font-size: 1.1em;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
             position: relative;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
-        }
-
-        .file-input-label::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-
-        .file-input-label:hover::before {
-            width: 300px;
-            height: 300px;
+            z-index: 1;
         }
 
         .file-input-label:hover {
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.4);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
         }
 
-        /* Animated controls */
         .controls {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
-            border-radius: 25px;
-            padding: 35px;
-            margin-bottom: 30px;
             display: none;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            animation: slideIn 0.6s ease-out;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
+            margin: 30px 0;
+            animation: fadeIn 0.5s ease;
         }
 
         .controls.active {
             display: block;
         }
 
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
         .control-group {
-            margin-bottom: 25px;
+            margin: 25px 0;
         }
 
-        label {
-            display: block;
-            margin-bottom: 12px;
-            color: var(--text-secondary);
+        .control-group label {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-primary);
             font-weight: 600;
-            font-size: 0.95em;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            margin-bottom: 10px;
+            font-size: 1.1em;
         }
 
-        /* Custom styled range slider */
+        .value-display {
+            color: var(--accent-color);
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
         input[type="range"] {
             width: 100%;
-            height: 10px;
+            height: 8px;
             border-radius: 10px;
-            background: linear-gradient(90deg, 
+            background: linear-gradient(to right, 
                 var(--accent-color) 0%, 
-                var(--accent-color) var(--value), 
-                rgba(255, 255, 255, 0.1) var(--value), 
-                rgba(255, 255, 255, 0.1) 100%);
+                var(--accent-color) var(--value, 50%), 
+                rgba(255, 255, 255, 0.2) var(--value, 50%), 
+                rgba(255, 255, 255, 0.2) 100%);
             outline: none;
             -webkit-appearance: none;
-            transition: background 0.3s;
+            cursor: pointer;
         }
 
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            appearance: none;
-            width: 25px;
-            height: 25px;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
-            background: radial-gradient(circle, var(--accent-color), #ff8c00);
+            background: var(--accent-color);
             cursor: pointer;
-            box-shadow: 
-                0 0 20px rgba(255, 215, 0, 0.5),
-                0 5px 10px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+            transition: all 0.3s ease;
         }
 
         input[type="range"]::-webkit-slider-thumb:hover {
             transform: scale(1.3);
-            box-shadow: 
-                0 0 30px rgba(255, 215, 0, 0.7),
-                0 5px 15px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 1);
         }
 
-        .value-display {
-            display: inline-block;
-            margin-left: 15px;
-            padding: 8px 20px;
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 255, 255, 0.1));
-            color: var(--accent-color);
-            border-radius: 25px;
-            font-weight: 700;
-            min-width: 100px;
-            text-align: center;
-            border: 1px solid rgba(255, 215, 0, 0.3);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-
-        /* Main reader display */
         .reader-display {
-            background: linear-gradient(135deg, rgba(15, 12, 41, 0.9), rgba(48, 43, 99, 0.8));
-            border-radius: 30px;
-            padding: 80px 40px;
-            margin-bottom: 30px;
-            min-height: 300px;
             display: none;
-            align-items: center;
-            justify-content: center;
+            text-align: center;
+            padding: 60px 20px;
+            min-height: 200px;
             position: relative;
-            overflow: hidden;
-            box-shadow: 
-                inset 0 0 50px rgba(0, 0, 0, 0.5),
-                0 0 100px rgba(102, 126, 234, 0.2);
-        }
-
-        .reader-display::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: 
-                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 80% 50%, rgba(255, 119, 198, 0.3) 0%, transparent 50%);
-            animation: nebula 20s ease-in-out infinite;
-        }
-
-        @keyframes nebula {
-            0%, 100% { transform: rotate(0deg) scale(1); }
-            50% { transform: rotate(180deg) scale(1.2); }
         }
 
         .reader-display.active {
-            display: flex;
-            animation: fadeInScale 0.8s ease-out;
+            display: block;
         }
 
-        @keyframes fadeInScale {
-            from {
-                opacity: 0;
-                transform: scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        #word-display {
+        .word-display {
             font-size: 5em;
+            font-weight: bold;
             color: var(--text-primary);
-            font-weight: 200;
-            text-align: center;
-            letter-spacing: 3px;
-            z-index: 1;
+            text-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+            margin: 40px 0;
+            min-height: 1.5em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             position: relative;
-            text-shadow: 
-                0 0 20px rgba(255, 255, 255, 0.5),
-                0 0 40px rgba(255, 255, 255, 0.3);
-            animation: textGlow 2s ease-in-out infinite alternate;
-        }
-
-        @keyframes textGlow {
-            from { 
-                text-shadow: 
-                    0 0 20px rgba(255, 255, 255, 0.5),
-                    0 0 40px rgba(255, 255, 255, 0.3);
-            }
-            to { 
-                text-shadow: 
-                    0 0 30px rgba(255, 255, 255, 0.7),
-                    0 0 60px rgba(255, 255, 255, 0.4),
-                    0 0 80px rgba(255, 215, 0, 0.2);
-            }
         }
 
         .focus-letter {
             color: var(--accent-color);
-            font-weight: 700;
-            animation: focusPulse 0.5s ease-out;
-            text-shadow: 
-                0 0 30px rgba(255, 215, 0, 0.8),
-                0 0 50px rgba(255, 215, 0, 0.5);
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+            animation: letterGlow 2s ease-in-out infinite alternate;
         }
 
-        @keyframes focusPulse {
-            0% { transform: scale(1.5); opacity: 0.5; }
-            100% { transform: scale(1); opacity: 1; }
+        @keyframes letterGlow {
+            from { text-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+            to { text-shadow: 0 0 40px rgba(255, 215, 0, 1); }
         }
 
-        /* Animated buttons */
         .button-group {
-            display: flex;
-            gap: 20px;
+            display: none;
+            gap: 15px;
             justify-content: center;
+            margin: 30px 0;
             flex-wrap: wrap;
-            margin-bottom: 30px;
         }
 
-        button {
-            padding: 15px 35px;
+        .btn {
+            padding: 12px 30px;
             border: none;
             border-radius: 50px;
             font-size: 1em;
-            font-weight: 700;
+            font-weight: bold;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-            color: var(--text-primary);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
             position: relative;
             overflow: hidden;
-            text-transform: uppercase;
-            letter-spacing: 1px;
         }
 
-        button::before {
+        .btn::before {
             content: '';
             position: absolute;
             top: 50%;
             left: 50%;
             width: 0;
             height: 0;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
             transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
+            transition: width 0.5s, height 0.5s;
         }
 
-        button:hover::before {
+        .btn:hover::before {
             width: 300px;
             height: 300px;
         }
 
-        button:hover {
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 
-                0 15px 30px rgba(0, 0, 0, 0.2),
-                0 0 30px rgba(255, 255, 255, 0.1);
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
         }
 
-        button:active {
-            transform: translateY(-1px) scale(1.02);
-        }
-
-        button.primary {
+        .btn-primary {
             background: var(--primary-gradient);
-            border: none;
-            box-shadow: 
-                0 10px 30px rgba(102, 126, 234, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.2);
         }
 
-        button.primary:hover {
-            box-shadow: 
-                0 15px 40px rgba(102, 126, 234, 0.4),
-                0 0 50px rgba(102, 126, 234, 0.2),
-                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        .btn-secondary {
+            background: linear-gradient(135deg, #667eea 0%, #9f7aea 100%);
         }
 
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
+        .btn-danger {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
         }
 
-        /* Progress bar with gradient animation */
+        .btn.glow {
+            animation: buttonGlow 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes buttonGlow {
+            from {
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            }
+            to {
+                box-shadow: 0 5px 30px rgba(102, 126, 234, 0.8);
+            }
+        }
+
         .progress-container {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 25px;
-            padding: 25px;
-            margin-bottom: 30px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
             display: none;
+            margin: 30px 0;
         }
 
         .progress-container.active {
             display: block;
-            animation: slideIn 0.6s ease-out;
         }
 
         .progress-bar {
@@ -534,83 +407,50 @@
             background: rgba(255, 255, 255, 0.1);
             border-radius: 10px;
             overflow: hidden;
-            position: relative;
             box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
         }
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, 
-                #00ff88 0%, 
-                #00ffff 25%, 
-                #ff00ff 50%, 
-                #ffff00 75%, 
-                #00ff88 100%);
-            background-size: 200% 100%;
+            background: var(--primary-gradient);
             width: 0%;
-            transition: width 0.5s ease;
-            animation: progressAnimation 3s linear infinite;
-            box-shadow: 
-                0 0 20px rgba(0, 255, 136, 0.5),
-                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            transition: width 0.3s ease;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.6);
         }
 
-        @keyframes progressAnimation {
-            0% { background-position: 0% 50%; }
-            100% { background-position: 200% 50%; }
-        }
-
-        /* Stats with glassmorphism */
         .stats {
-            display: flex;
-            justify-content: space-around;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 20px;
-            flex-wrap: wrap;
+            margin: 30px 0;
         }
 
         .stat-item {
-            flex: 1;
-            min-width: 150px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 15px;
+            border: 1px solid var(--glass-border);
             text-align: center;
-            padding: 20px;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: all 0.3s ease;
-        }
-
-        .stat-item:hover {
-            transform: translateY(-5px) scale(1.05);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08));
-        }
-
-        .stat-value {
-            font-size: 2em;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--accent-color), #ff8c00);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 5px;
         }
 
         .stat-label {
             color: var(--text-secondary);
             font-size: 0.9em;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 600;
+            margin-bottom: 5px;
         }
 
-        /* Loading animation */
+        .stat-value {
+            color: var(--text-primary);
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
         .loading {
             display: none;
             text-align: center;
-            padding: 30px;
+            padding: 40px;
             color: var(--text-primary);
-            font-weight: 600;
             font-size: 1.2em;
         }
 
@@ -619,51 +459,23 @@
         }
 
         .loading-spinner {
-            width: 60px;
-            height: 60px;
-            margin: 20px auto;
-            border: 4px solid rgba(255, 255, 255, 0.1);
-            border-top-color: var(--accent-color);
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-top: 4px solid var(--accent-color);
             border-radius: 50%;
+            margin: 0 auto 20px;
             animation: spin 1s linear infinite;
         }
 
         @keyframes spin {
+            from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
 
-        /* Responsive design */
-        @media (max-width: 768px) {
-            .container {
-                padding: 30px 20px;
-            }
-
-            h1 {
-                font-size: 2.5em;
-            }
-
-            #word-display {
-                font-size: 3em;
-            }
-
-            .button-group {
-                flex-direction: column;
-                gap: 10px;
-            }
-
-            button {
-                width: 100%;
-            }
-        }
-
-        /* Glow effect for important elements */
-        .glow {
-            animation: glowEffect 2s ease-in-out infinite;
-        }
-
-        @keyframes glowEffect {
-            0%, 100% {
-                box-shadow: 
+        @keyframes textGlow {
+            0% {
+                text-shadow: 
                     0 0 20px rgba(255, 215, 0, 0.5),
                     0 0 40px rgba(255, 215, 0, 0.3);
             }
@@ -673,6 +485,42 @@
                     0 0 60px rgba(255, 215, 0, 0.5);
             }
         }
+
+        /* Debug console */
+        .debug-console {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 300px;
+            max-height: 200px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #00ff00;
+            font-family: monospace;
+            font-size: 12px;
+            padding: 10px;
+            border-radius: 10px;
+            overflow-y: auto;
+            display: none;
+            z-index: 1000;
+        }
+
+        .debug-console.active {
+            display: block;
+        }
+
+        .debug-toggle {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: 1px solid #00ff00;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            z-index: 1000;
+        }
     </style>
 </head>
 <body class="light-mode">
@@ -681,6 +529,12 @@
 
     <!-- Theme toggle -->
     <div class="theme-toggle" id="theme-toggle">🌙</div>
+
+    <!-- Debug toggle -->
+    <div class="debug-toggle" id="debug-toggle">Debug Console</div>
+
+    <!-- Debug console -->
+    <div class="debug-console" id="debug-console"></div>
 
     <div class="container">
         <h1><span class="emoji-icon">⚡</span> Speed Reader Pro</h1>
@@ -730,66 +584,80 @@
         </div>
 
         <div class="reader-display" id="reader-display">
-            <div id="word-display">Bereit zum Lesen ✨</div>
+            <div class="word-display" id="word-display">Bereit zum Starten...</div>
         </div>
 
-        <div class="button-group" id="button-group" style="display: none;">
-            <button id="play-pause-btn" class="primary">▶️ START</button>
-            <button id="reset-btn">⏮️ NEUSTART</button>
-            <button id="skip-back-btn">⏪ -10</button>
-            <button id="skip-forward-btn">⏩ +10</button>
+        <div class="button-group" id="button-group">
+            <button class="btn btn-secondary" id="skip-back-btn">⏪ -10</button>
+            <button class="btn btn-primary" id="play-pause-btn">▶️ START</button>
+            <button class="btn btn-secondary" id="skip-forward-btn">⏩ +10</button>
+            <button class="btn btn-danger" id="reset-btn">🔄 RESET</button>
         </div>
 
         <div class="progress-container" id="progress-container">
             <div class="progress-bar">
                 <div class="progress-fill" id="progress-fill"></div>
             </div>
-            
-            <div class="stats" style="margin-top: 25px;">
+            <div class="stats">
                 <div class="stat-item">
-                    <div class="stat-value" id="words-read">0</div>
                     <div class="stat-label">Gelesen</div>
+                    <div class="stat-value" id="words-read">0</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-value" id="total-words">0</div>
                     <div class="stat-label">Gesamt</div>
+                    <div class="stat-value" id="total-words">0</div>
                 </div>
                 <div class="stat-item">
+                    <div class="stat-label">Zeit übrig</div>
                     <div class="stat-value" id="time-remaining">0:00</div>
-                    <div class="stat-label">Verbleibend</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-value" id="current-wpm">0</div>
                     <div class="stat-label">WPM</div>
+                    <div class="stat-value" id="current-wpm">300</div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Create particles
+        // Create floating particles
         function createParticles() {
             const particlesContainer = document.getElementById('particles');
-            const particleCount = 50;
-            
-            for (let i = 0; i < particleCount; i++) {
+            for (let i = 0; i < 20; i++) {
                 const particle = document.createElement('div');
                 particle.className = 'particle';
                 particle.style.left = Math.random() * 100 + '%';
                 particle.style.animationDelay = Math.random() * 20 + 's';
-                particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+                particle.style.animationDuration = (15 + Math.random() * 20) + 's';
                 particlesContainer.appendChild(particle);
             }
         }
         createParticles();
 
+        // Debug console functionality
+        const debugConsole = document.getElementById('debug-console');
+        const debugToggle = document.getElementById('debug-toggle');
+        let debugActive = false;
+
+        debugToggle.addEventListener('click', () => {
+            debugActive = !debugActive;
+            debugConsole.classList.toggle('active');
+        });
+
+        function debugLog(message, type = 'info') {
+            console.log(`[${type}] ${message}`);
+            if (debugActive) {
+                const timestamp = new Date().toLocaleTimeString();
+                debugConsole.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+                debugConsole.scrollTop = debugConsole.scrollHeight;
+            }
+        }
+
         // Theme toggle
         const themeToggle = document.getElementById('theme-toggle');
-        const body = document.body;
-        let isDarkMode = false;
-
         themeToggle.addEventListener('click', () => {
-            isDarkMode = !isDarkMode;
+            const body = document.body;
+            const isDarkMode = body.classList.contains('light-mode');
             body.className = isDarkMode ? 'dark-mode' : 'light-mode';
             themeToggle.textContent = isDarkMode ? '☀️' : '🌙';
             themeToggle.style.transform = 'scale(1.2) rotate(360deg)';
@@ -882,6 +750,7 @@
         async function handleFile(file) {
             const fileType = file.name.split('.').pop().toLowerCase();
             
+            debugLog(`Datei geladen: ${file.name} (${fileType})`);
             loading.classList.add('active');
             uploadSection.style.display = 'none';
             
@@ -900,7 +769,8 @@
                 initializeReader();
             } catch (error) {
                 console.error('Fehler beim Verarbeiten der Datei:', error);
-                alert('Fehler beim Laden der Datei. Bitte versuchen Sie es erneut.');
+                debugLog(`Fehler: ${error.message}`, 'error');
+                alert('Fehler beim Laden der Datei. Details in der Debug-Konsole.');
                 uploadSection.style.display = 'block';
             } finally {
                 loading.classList.remove('active');
@@ -909,48 +779,173 @@
 
         // Process PDF
         async function processPDF(file) {
+            debugLog('PDF-Verarbeitung gestartet...');
             const arrayBuffer = await file.arrayBuffer();
             const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
             let fullText = '';
+
+            debugLog(`PDF hat ${pdf.numPages} Seiten`);
 
             for (let i = 1; i <= pdf.numPages; i++) {
                 const page = await pdf.getPage(i);
                 const textContent = await page.getTextContent();
                 const pageText = textContent.items.map(item => item.str).join(' ');
                 fullText += pageText + ' ';
+                
+                if (i % 10 === 0) {
+                    debugLog(`${i} Seiten verarbeitet...`);
+                }
             }
 
             words = fullText.split(/\s+/).filter(word => word.length > 0);
+            debugLog(`PDF erfolgreich verarbeitet: ${words.length} Wörter gefunden`);
         }
 
-        // Process EPUB
+        // Process EPUB - Verbesserte Version
         async function processEPUB(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 
                 reader.onload = async function(e) {
                     try {
+                        debugLog('EPUB-Verarbeitung gestartet...');
                         const book = ePub(e.target.result);
                         
                         await book.ready;
+                        debugLog('EPUB bereit, lade Spine...');
                         
-                        const spine = await book.loaded.spine;
-                        let fullText = '';
-                        
-                        for (let item of spine.items) {
-                            const doc = await book.load(item.href);
-                            const textContent = doc.innerText || doc.textContent || '';
-                            fullText += textContent + ' ';
+                        // Versuche verschiedene Methoden, um den Spine zu laden
+                        let spine;
+                        try {
+                            spine = await book.loaded.spine;
+                        } catch (spineError) {
+                            debugLog('Standard Spine-Laden fehlgeschlagen, versuche alternative Methode...', 'warn');
+                            spine = book.spine;
                         }
                         
+                        if (!spine || !spine.items) {
+                            throw new Error('Keine Spine-Items gefunden');
+                        }
+                        
+                        let fullText = '';
+                        let processedItems = 0;
+                        
+                        debugLog(`${spine.items.length} Kapitel gefunden`);
+                        
+                        for (let item of spine.items) {
+                            try {
+                                const doc = await book.load(item.href);
+                                
+                                // Verbesserte Textextraktion mit mehreren Fallback-Methoden
+                                let textContent = '';
+                                
+                                if (typeof doc === 'string') {
+                                    // Methode 1: Doc ist bereits ein String (HTML)
+                                    debugLog(`Kapitel ${processedItems + 1}: HTML-String erhalten`);
+                                    
+                                    // Erstelle ein temporäres DOM-Element zum Parsen
+                                    const tempDiv = document.createElement('div');
+                                    tempDiv.innerHTML = doc;
+                                    
+                                    // Entferne Script und Style Tags
+                                    const scripts = tempDiv.querySelectorAll('script, style');
+                                    scripts.forEach(el => el.remove());
+                                    
+                                    // Extrahiere Text
+                                    textContent = tempDiv.textContent || tempDiv.innerText || '';
+                                    
+                                } else if (doc && typeof doc === 'object') {
+                                    // Methode 2: Doc ist ein DOM-Objekt
+                                    debugLog(`Kapitel ${processedItems + 1}: DOM-Objekt erhalten`);
+                                    
+                                    if (doc.body) {
+                                        // Entferne Script und Style Tags
+                                        const scripts = doc.querySelectorAll('script, style');
+                                        scripts.forEach(el => el.remove());
+                                        
+                                        textContent = doc.body.textContent || doc.body.innerText || '';
+                                    } else if (doc.documentElement) {
+                                        textContent = doc.documentElement.textContent || doc.documentElement.innerText || '';
+                                    } else if (doc.innerText) {
+                                        textContent = doc.innerText;
+                                    } else if (doc.textContent) {
+                                        textContent = doc.textContent;
+                                    }
+                                }
+                                
+                                // Bereinige den Text
+                                textContent = textContent
+                                    .replace(/\[.*?\]/g, ' ')  // Entferne Referenzen in eckigen Klammern
+                                    .replace(/\{.*?\}/g, ' ')  // Entferne geschweifte Klammern
+                                    .replace(/\s+/g, ' ')      // Mehrfache Leerzeichen entfernen
+                                    .replace(/\n+/g, ' ')      // Zeilenumbrüche durch Leerzeichen ersetzen
+                                    .trim();
+                                
+                                if (textContent && textContent.length > 0) {
+                                    fullText += textContent + ' ';
+                                    processedItems++;
+                                    debugLog(`Kapitel ${processedItems}: ${textContent.substring(0, 100)}...`);
+                                } else {
+                                    debugLog(`Kapitel ${processedItems + 1}: Kein Text gefunden`, 'warn');
+                                }
+                                
+                            } catch (itemError) {
+                                debugLog(`Fehler bei Kapitel ${processedItems + 1}: ${itemError.message}`, 'error');
+                                continue;
+                            }
+                        }
+                        
+                        debugLog(`${processedItems} von ${spine.items.length} Kapiteln verarbeitet`);
+                        
+                        // Finale Textbereinigung
+                        fullText = fullText
+                            .replace(/[^\w\s.,!?;:'"()-äöüÄÖÜßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ]/gi, ' ')
+                            .replace(/\s+/g, ' ')
+                            .trim();
+                        
+                        debugLog(`Gesamttext-Länge: ${fullText.length} Zeichen`);
+                        
                         words = fullText.split(/\s+/).filter(word => word.length > 0);
+                        
+                        debugLog(`EPUB erfolgreich verarbeitet: ${words.length} Wörter gefunden`);
+                        
+                        if (words.length === 0) {
+                            // Letzter Versuch: Rohtext aus allen Sections
+                            debugLog('Keine Wörter gefunden, versuche Notfall-Methode...', 'warn');
+                            
+                            try {
+                                const sections = book.spine.items;
+                                for (let section of sections) {
+                                    try {
+                                        const rawContent = await section.load();
+                                        if (rawContent) {
+                                            const textOnly = rawContent.replace(/<[^>]*>/g, ' ');
+                                            fullText += textOnly + ' ';
+                                        }
+                                    } catch (secError) {
+                                        continue;
+                                    }
+                                }
+                                
+                                words = fullText.split(/\s+/).filter(word => word.length > 0);
+                                debugLog(`Notfall-Methode: ${words.length} Wörter gefunden`);
+                            } catch (emergencyError) {
+                                debugLog('Notfall-Methode fehlgeschlagen', 'error');
+                            }
+                        }
+                        
                         resolve();
                     } catch (error) {
+                        debugLog(`Kritischer EPUB-Fehler: ${error.message}`, 'error');
                         reject(error);
                     }
                 };
                 
-                reader.onerror = reject;
+                reader.onerror = (error) => {
+                    debugLog(`FileReader Fehler: ${error}`, 'error');
+                    reject(error);
+                };
+                
                 reader.readAsArrayBuffer(file);
             });
         }
@@ -958,11 +953,13 @@
         // Initialize reader
         function initializeReader() {
             if (words.length === 0) {
-                alert('Keine Wörter gefunden.');
+                alert('Keine Wörter gefunden. Die Datei könnte leer oder beschädigt sein.');
+                debugLog('Initialisierung fehlgeschlagen: Keine Wörter', 'error');
                 uploadSection.style.display = 'block';
                 return;
             }
 
+            debugLog(`Reader initialisiert mit ${words.length} Wörtern`);
             controls.classList.add('active');
             readerDisplay.classList.add('active');
             buttonGroup.style.display = 'flex';
@@ -1045,6 +1042,7 @@
             }, interval);
 
             displayWord();
+            debugLog(`Wiedergabe gestartet bei ${wordsPerMinute} WPM`);
         }
 
         function pause() {
@@ -1052,6 +1050,7 @@
             playPauseBtn.textContent = '▶️ WEITER';
             playPauseBtn.classList.remove('glow');
             clearInterval(intervalId);
+            debugLog('Wiedergabe pausiert');
         }
 
         function stop() {
@@ -1064,6 +1063,7 @@
                 wordDisplay.innerHTML = 'Fertig! 🎉';
                 currentIndex = words.length;
                 updateStats();
+                debugLog('Lesen abgeschlossen!');
                 
                 // Celebration animation
                 confetti();
@@ -1111,6 +1111,7 @@
             currentIndex = 0;
             displayWord();
             playPauseBtn.textContent = '▶️ START';
+            debugLog('Position zurückgesetzt');
         });
 
         skipBackBtn.addEventListener('click', () => {
@@ -1154,10 +1155,8 @@
             wordDisplay.style.fontSize = `${size}em`;
         });
 
-        // Enhanced keyboard shortcuts
+        // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
-            if (!words.length) return;
-
             switch(e.key) {
                 case ' ':
                     e.preventDefault();
@@ -1168,31 +1167,43 @@
                     }
                     break;
                 case 'ArrowLeft':
+                    e.preventDefault();
                     currentIndex = Math.max(0, currentIndex - 10);
                     displayWord();
                     break;
                 case 'ArrowRight':
+                    e.preventDefault();
                     currentIndex = Math.min(words.length - 1, currentIndex + 10);
                     displayWord();
                     break;
                 case 'ArrowUp':
-                    speedSlider.value = Math.min(1000, parseInt(speedSlider.value) + 50);
-                    speedSlider.dispatchEvent(new Event('input'));
+                    e.preventDefault();
+                    wordsPerMinute = Math.min(1000, wordsPerMinute + 50);
+                    speedSlider.value = wordsPerMinute;
+                    speedValue.textContent = `${wordsPerMinute} WPM`;
+                    currentWpmStat.textContent = wordsPerMinute;
+                    updateSliderBackground(speedSlider);
+                    if (isPlaying) {
+                        pause();
+                        play();
+                    }
                     break;
                 case 'ArrowDown':
-                    speedSlider.value = Math.max(100, parseInt(speedSlider.value) - 50);
-                    speedSlider.dispatchEvent(new Event('input'));
-                    break;
-                case 'r':
-                case 'R':
-                    currentIndex = 0;
-                    displayWord();
-                    break;
-                case 'Escape':
-                    if (isPlaying) pause();
+                    e.preventDefault();
+                    wordsPerMinute = Math.max(100, wordsPerMinute - 50);
+                    speedSlider.value = wordsPerMinute;
+                    speedValue.textContent = `${wordsPerMinute} WPM`;
+                    currentWpmStat.textContent = wordsPerMinute;
+                    updateSliderBackground(speedSlider);
+                    if (isPlaying) {
+                        pause();
+                        play();
+                    }
                     break;
             }
         });
+
+        debugLog('Speed Reader Pro geladen und bereit');
     </script>
 </body>
 </html>
