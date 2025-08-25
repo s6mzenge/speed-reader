@@ -521,6 +521,161 @@
             font-size: 12px;
             z-index: 1000;
         }
+
+        /* Chapter selection modal */
+        .chapter-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .chapter-modal.active {
+            display: flex;
+        }
+
+        .chapter-content {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            color: var(--text-primary);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .chapter-content h2 {
+            margin-bottom: 20px;
+            text-align: center;
+            color: var(--accent-color);
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+
+        .chapter-options {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .chapter-option-btn {
+            padding: 10px 20px;
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .chapter-option-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .chapter-option-btn.active {
+            background: var(--accent-color);
+            color: #333;
+        }
+
+        .chapter-list {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .chapter-item {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chapter-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .chapter-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--accent-color);
+        }
+
+        .chapter-item label {
+            cursor: pointer;
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chapter-title {
+            flex: 1;
+        }
+
+        .chapter-words {
+            color: var(--text-secondary);
+            font-size: 0.9em;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+
+        .chapter-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .select-all-btn {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+
+        .select-all-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
     </style>
 </head>
 <body class="light-mode">
@@ -535,6 +690,24 @@
 
     <!-- Debug console -->
     <div class="debug-console" id="debug-console"></div>
+
+    <!-- Chapter selection modal -->
+    <div class="chapter-modal" id="chapter-modal">
+        <div class="chapter-content">
+            <h2>📚 Kapitelauswahl</h2>
+            <div class="chapter-options">
+                <button class="chapter-option-btn active" id="read-all">Gesamtes Buch</button>
+                <button class="chapter-option-btn" id="read-single">Einzelnes Kapitel</button>
+                <button class="chapter-option-btn" id="read-multiple">Mehrere Kapitel</button>
+            </div>
+            <button class="select-all-btn" id="select-all-btn" style="display: none;">Alle auswählen/abwählen</button>
+            <div class="chapter-list" id="chapter-list"></div>
+            <div class="chapter-actions">
+                <button class="btn btn-danger" id="chapter-cancel">Abbrechen</button>
+                <button class="btn btn-primary" id="chapter-confirm">Lesen starten</button>
+            </div>
+        </div>
+    </div>
 
     <div class="container">
         <h1><span class="emoji-icon">⚡</span> Speed Reader Pro</h1>
@@ -676,6 +849,10 @@
         let intervalId = null;
         let wordsPerMinute = 300;
         let wordsPerChunk = 1;
+        let currentBook = null; // Store EPUB book object
+        let chapters = []; // Store chapter information
+        let selectedChapters = []; // Store selected chapter indices
+        let selectionMode = 'all'; // 'all', 'single', 'multiple'
 
         // DOM elements
         const fileInput = document.getElementById('file-input');
@@ -757,8 +934,10 @@
             try {
                 if (fileType === 'pdf') {
                     await processPDF(file);
+                    initializeReader();
                 } else if (fileType === 'epub') {
                     await processEPUB(file);
+                    // Bei EPUB wird initializeReader() nach der Kapitelauswahl aufgerufen
                 } else {
                     alert('Bitte wählen Sie eine PDF- oder EPUB-Datei aus.');
                     uploadSection.style.display = 'block';
@@ -766,13 +945,11 @@
                     return;
                 }
                 
-                initializeReader();
             } catch (error) {
                 console.error('Fehler beim Verarbeiten der Datei:', error);
                 debugLog(`Fehler: ${error.message}`, 'error');
                 alert('Fehler beim Laden der Datei. Details in der Debug-Konsole.');
                 uploadSection.style.display = 'block';
-            } finally {
                 loading.classList.remove('active');
             }
         }
@@ -799,9 +976,10 @@
 
             words = fullText.split(/\s+/).filter(word => word.length > 0);
             debugLog(`PDF erfolgreich verarbeitet: ${words.length} Wörter gefunden`);
+            loading.classList.remove('active');
         }
 
-        // Process EPUB - Verbesserte Version
+        // Process EPUB - Verbesserte Version mit Kapitelauswahl
         async function processEPUB(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -810,11 +988,12 @@
                     try {
                         debugLog('EPUB-Verarbeitung gestartet...');
                         const book = ePub(e.target.result);
+                        currentBook = book;
                         
                         await book.ready;
-                        debugLog('EPUB bereit, lade Spine...');
+                        debugLog('EPUB bereit, analysiere Kapitelstruktur...');
                         
-                        // Versuche verschiedene Methoden, um den Spine zu laden
+                        // Lade Kapitelstruktur
                         let spine;
                         try {
                             spine = await book.loaded.spine;
@@ -827,114 +1006,38 @@
                             throw new Error('Keine Spine-Items gefunden');
                         }
                         
-                        let fullText = '';
-                        let processedItems = 0;
-                        
-                        debugLog(`${spine.items.length} Kapitel gefunden`);
-                        
-                        for (let item of spine.items) {
-                            try {
-                                const doc = await book.load(item.href);
-                                
-                                // Verbesserte Textextraktion mit mehreren Fallback-Methoden
-                                let textContent = '';
-                                
-                                if (typeof doc === 'string') {
-                                    // Methode 1: Doc ist bereits ein String (HTML)
-                                    debugLog(`Kapitel ${processedItems + 1}: HTML-String erhalten`);
-                                    
-                                    // Erstelle ein temporäres DOM-Element zum Parsen
-                                    const tempDiv = document.createElement('div');
-                                    tempDiv.innerHTML = doc;
-                                    
-                                    // Entferne Script und Style Tags
-                                    const scripts = tempDiv.querySelectorAll('script, style');
-                                    scripts.forEach(el => el.remove());
-                                    
-                                    // Extrahiere Text
-                                    textContent = tempDiv.textContent || tempDiv.innerText || '';
-                                    
-                                } else if (doc && typeof doc === 'object') {
-                                    // Methode 2: Doc ist ein DOM-Objekt
-                                    debugLog(`Kapitel ${processedItems + 1}: DOM-Objekt erhalten`);
-                                    
-                                    if (doc.body) {
-                                        // Entferne Script und Style Tags
-                                        const scripts = doc.querySelectorAll('script, style');
-                                        scripts.forEach(el => el.remove());
-                                        
-                                        textContent = doc.body.textContent || doc.body.innerText || '';
-                                    } else if (doc.documentElement) {
-                                        textContent = doc.documentElement.textContent || doc.documentElement.innerText || '';
-                                    } else if (doc.innerText) {
-                                        textContent = doc.innerText;
-                                    } else if (doc.textContent) {
-                                        textContent = doc.textContent;
-                                    }
-                                }
-                                
-                                // Bereinige den Text
-                                textContent = textContent
-                                    .replace(/\[.*?\]/g, ' ')  // Entferne Referenzen in eckigen Klammern
-                                    .replace(/\{.*?\}/g, ' ')  // Entferne geschweifte Klammern
-                                    .replace(/\s+/g, ' ')      // Mehrfache Leerzeichen entfernen
-                                    .replace(/\n+/g, ' ')      // Zeilenumbrüche durch Leerzeichen ersetzen
-                                    .trim();
-                                
-                                if (textContent && textContent.length > 0) {
-                                    fullText += textContent + ' ';
-                                    processedItems++;
-                                    debugLog(`Kapitel ${processedItems}: ${textContent.substring(0, 100)}...`);
-                                } else {
-                                    debugLog(`Kapitel ${processedItems + 1}: Kein Text gefunden`, 'warn');
-                                }
-                                
-                            } catch (itemError) {
-                                debugLog(`Fehler bei Kapitel ${processedItems + 1}: ${itemError.message}`, 'error');
-                                continue;
-                            }
-                        }
-                        
-                        debugLog(`${processedItems} von ${spine.items.length} Kapiteln verarbeitet`);
-                        
-                        // Finale Textbereinigung
-                        fullText = fullText
-                            .replace(/[^\w\s.,!?;:'"()-äöüÄÖÜßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ]/gi, ' ')
-                            .replace(/\s+/g, ' ')
-                            .trim();
-                        
-                        debugLog(`Gesamttext-Länge: ${fullText.length} Zeichen`);
-                        
-                        words = fullText.split(/\s+/).filter(word => word.length > 0);
-                        
-                        debugLog(`EPUB erfolgreich verarbeitet: ${words.length} Wörter gefunden`);
-                        
-                        if (words.length === 0) {
-                            // Letzter Versuch: Rohtext aus allen Sections
-                            debugLog('Keine Wörter gefunden, versuche Notfall-Methode...', 'warn');
+                        // Analysiere Kapitel
+                        chapters = [];
+                        for (let i = 0; i < spine.items.length; i++) {
+                            const item = spine.items[i];
+                            let chapterTitle = `Kapitel ${i + 1}`;
                             
-                            try {
-                                const sections = book.spine.items;
-                                for (let section of sections) {
-                                    try {
-                                        const rawContent = await section.load();
-                                        if (rawContent) {
-                                            const textOnly = rawContent.replace(/<[^>]*>/g, ' ');
-                                            fullText += textOnly + ' ';
-                                        }
-                                    } catch (secError) {
-                                        continue;
-                                    }
+                            // Versuche den Kapitelnamen aus den Metadaten zu bekommen
+                            if (book.navigation && book.navigation.toc) {
+                                const tocItem = book.navigation.toc.find(t => 
+                                    t.href && t.href.includes(item.href));
+                                if (tocItem && tocItem.label) {
+                                    chapterTitle = tocItem.label.trim();
                                 }
-                                
-                                words = fullText.split(/\s+/).filter(word => word.length > 0);
-                                debugLog(`Notfall-Methode: ${words.length} Wörter gefunden`);
-                            } catch (emergencyError) {
-                                debugLog('Notfall-Methode fehlgeschlagen', 'error');
+                            } else if (item.idref) {
+                                chapterTitle = item.idref.replace(/_/g, ' ').replace(/-/g, ' ');
                             }
+                            
+                            chapters.push({
+                                index: i,
+                                title: chapterTitle,
+                                item: item,
+                                wordCount: 0,
+                                text: ''
+                            });
                         }
                         
+                        debugLog(`${chapters.length} Kapitel gefunden`);
+                        
+                        // Zeige Kapitelauswahl-Modal
+                        showChapterSelection();
                         resolve();
+                        
                     } catch (error) {
                         debugLog(`Kritischer EPUB-Fehler: ${error.message}`, 'error');
                         reject(error);
@@ -948,6 +1051,233 @@
                 
                 reader.readAsArrayBuffer(file);
             });
+        }
+
+        // Zeige Kapitelauswahl-Modal
+        function showChapterSelection() {
+            const modal = document.getElementById('chapter-modal');
+            const chapterList = document.getElementById('chapter-list');
+            
+            // Setze Modal zurück
+            selectionMode = 'all';
+            document.getElementById('read-all').classList.add('active');
+            document.getElementById('read-single').classList.remove('active');
+            document.getElementById('read-multiple').classList.remove('active');
+            document.getElementById('select-all-btn').style.display = 'none';
+            
+            // Erstelle Kapitelliste
+            let listHTML = '';
+            chapters.forEach((chapter, index) => {
+                listHTML += `
+                    <div class="chapter-item">
+                        <input type="checkbox" id="chapter-${index}" value="${index}" checked>
+                        <label for="chapter-${index}">
+                            <span class="chapter-title">${chapter.title}</span>
+                            <span class="chapter-words" id="words-${index}">Analysiere...</span>
+                        </label>
+                    </div>
+                `;
+            });
+            chapterList.innerHTML = listHTML;
+            
+            // Zeige Modal
+            modal.classList.add('active');
+            loading.classList.remove('active');
+            
+            // Analysiere Kapitel-Wortanzahl im Hintergrund
+            analyzeChapterWords();
+        }
+
+        // Analysiere Wortanzahl für jedes Kapitel
+        async function analyzeChapterWords() {
+            for (let i = 0; i < chapters.length; i++) {
+                const chapter = chapters[i];
+                try {
+                    const doc = await currentBook.load(chapter.item.href);
+                    let textContent = extractTextFromDoc(doc);
+                    
+                    const words = textContent.split(/\s+/).filter(word => word.length > 0);
+                    chapter.wordCount = words.length;
+                    chapter.text = textContent;
+                    
+                    // Update UI
+                    const wordsElement = document.getElementById(`words-${i}`);
+                    if (wordsElement) {
+                        wordsElement.textContent = `${words.length.toLocaleString()} Wörter`;
+                    }
+                } catch (error) {
+                    debugLog(`Fehler bei Kapitel ${i}: ${error.message}`, 'warn');
+                }
+            }
+        }
+
+        // Extrahiere Text aus einem Dokument
+        function extractTextFromDoc(doc) {
+            let textContent = '';
+            
+            if (typeof doc === 'string') {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = doc;
+                
+                // Entferne Script und Style Tags
+                const scripts = tempDiv.querySelectorAll('script, style');
+                scripts.forEach(el => el.remove());
+                
+                textContent = tempDiv.textContent || tempDiv.innerText || '';
+            } else if (doc && typeof doc === 'object') {
+                if (doc.body) {
+                    const scripts = doc.querySelectorAll('script, style');
+                    scripts.forEach(el => el.remove());
+                    textContent = doc.body.textContent || doc.body.innerText || '';
+                } else if (doc.documentElement) {
+                    textContent = doc.documentElement.textContent || doc.documentElement.innerText || '';
+                } else if (doc.innerText) {
+                    textContent = doc.innerText;
+                } else if (doc.textContent) {
+                    textContent = doc.textContent;
+                }
+            }
+            
+            // Bereinige den Text
+            textContent = textContent
+                .replace(/\[.*?\]/g, ' ')
+                .replace(/\{.*?\}/g, ' ')
+                .replace(/\s+/g, ' ')
+                .replace(/\n+/g, ' ')
+                .trim();
+            
+            return textContent;
+        }
+
+        // Event Listeners für Kapitelauswahl
+        document.getElementById('read-all').addEventListener('click', function() {
+            selectionMode = 'all';
+            document.querySelectorAll('.chapter-option-btn').forEach(btn => 
+                btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Wähle alle Kapitel
+            document.querySelectorAll('.chapter-item input').forEach(checkbox => {
+                checkbox.checked = true;
+                checkbox.disabled = true;
+            });
+            document.getElementById('select-all-btn').style.display = 'none';
+        });
+
+        document.getElementById('read-single').addEventListener('click', function() {
+            selectionMode = 'single';
+            document.querySelectorAll('.chapter-option-btn').forEach(btn => 
+                btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Aktiviere Checkboxen als Radio-Buttons
+            const checkboxes = document.querySelectorAll('.chapter-item input');
+            checkboxes.forEach((checkbox, index) => {
+                checkbox.disabled = false;
+                checkbox.checked = index === 0;
+                checkbox.type = 'radio';
+                checkbox.name = 'chapter-selection';
+            });
+            document.getElementById('select-all-btn').style.display = 'none';
+        });
+
+        document.getElementById('read-multiple').addEventListener('click', function() {
+            selectionMode = 'multiple';
+            document.querySelectorAll('.chapter-option-btn').forEach(btn => 
+                btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Aktiviere Checkboxen
+            const checkboxes = document.querySelectorAll('.chapter-item input');
+            checkboxes.forEach(checkbox => {
+                checkbox.disabled = false;
+                checkbox.type = 'checkbox';
+                checkbox.checked = false;
+            });
+            document.getElementById('select-all-btn').style.display = 'block';
+        });
+
+        document.getElementById('select-all-btn').addEventListener('click', function() {
+            const checkboxes = document.querySelectorAll('.chapter-item input');
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = !allChecked;
+            });
+        });
+
+        document.getElementById('chapter-cancel').addEventListener('click', function() {
+            document.getElementById('chapter-modal').classList.remove('active');
+            uploadSection.style.display = 'block';
+            currentBook = null;
+            chapters = [];
+        });
+
+        document.getElementById('chapter-confirm').addEventListener('click', async function() {
+            const checkboxes = document.querySelectorAll('.chapter-item input:checked');
+            
+            if (checkboxes.length === 0) {
+                alert('Bitte wählen Sie mindestens ein Kapitel aus.');
+                return;
+            }
+            
+            // Sammle ausgewählte Kapitel
+            selectedChapters = Array.from(checkboxes).map(cb => parseInt(cb.value));
+            
+            // Verstecke Modal und zeige Ladeindikator
+            document.getElementById('chapter-modal').classList.remove('active');
+            loading.classList.add('active');
+            
+            // Lade Text der ausgewählten Kapitel
+            await loadSelectedChapters();
+        });
+
+        // Lade Text der ausgewählten Kapitel
+        async function loadSelectedChapters() {
+            let fullText = '';
+            let processedCount = 0;
+            
+            debugLog(`Lade ${selectedChapters.length} ausgewählte Kapitel...`);
+            
+            for (const chapterIndex of selectedChapters) {
+                const chapter = chapters[chapterIndex];
+                
+                // Verwende bereits analysierten Text wenn vorhanden
+                if (chapter.text) {
+                    fullText += chapter.text + ' ';
+                    processedCount++;
+                    debugLog(`Kapitel ${processedCount}/${selectedChapters.length}: "${chapter.title}" geladen`);
+                } else {
+                    // Lade Text falls noch nicht vorhanden
+                    try {
+                        const doc = await currentBook.load(chapter.item.href);
+                        const textContent = extractTextFromDoc(doc);
+                        fullText += textContent + ' ';
+                        processedCount++;
+                        debugLog(`Kapitel ${processedCount}/${selectedChapters.length}: "${chapter.title}" geladen`);
+                    } catch (error) {
+                        debugLog(`Fehler beim Laden von Kapitel "${chapter.title}": ${error.message}`, 'error');
+                    }
+                }
+            }
+            
+            // Finale Textbereinigung
+            fullText = fullText
+                .replace(/[^\w\s.,!?;:'"()-äöüÄÖÜßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ]/gi, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+            
+            words = fullText.split(/\s+/).filter(word => word.length > 0);
+            
+            const chapterInfo = selectedChapters.length === 1 
+                ? `Kapitel "${chapters[selectedChapters[0]].title}"` 
+                : `${selectedChapters.length} Kapitel`;
+            
+            debugLog(`${chapterInfo} erfolgreich geladen: ${words.length} Wörter`);
+            
+            loading.classList.remove('active');
+            
+            // Initialisiere Reader
+            initializeReader();
         }
 
         // Initialize reader
