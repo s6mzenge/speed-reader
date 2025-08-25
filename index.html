@@ -298,6 +298,23 @@
             display: block;
         }
 
+        /* ORP Marker - vertikale Linie zur Orientierung */
+        .orp-marker {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 2px;
+            height: 60px;
+            background: linear-gradient(to bottom, 
+                transparent,
+                rgba(255, 215, 0, 0.2) 20%,
+                rgba(255, 215, 0, 0.2) 80%,
+                transparent);
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
         .word-display {
             font-size: 5em;
             font-weight: bold;
@@ -309,12 +326,61 @@
             align-items: center;
             justify-content: center;
             position: relative;
+            font-family: 'Courier New', monospace; /* Monospace für konsistente Buchstabenbreite */
+        }
+
+        .word-container {
+            display: inline-flex;
+            position: relative;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .word-part {
+            display: inline-block;
+            white-space: pre; /* Erhält Leerzeichen */
+        }
+
+        .word-part.before {
+            text-align: right;
+            display: inline-block;
+            width: 8em;
+            padding-right: 0.1em;
+        }
+
+        .word-part.after {
+            text-align: left;
+            display: inline-block;
+            width: 8em;
+            padding-left: 0.1em;
         }
 
         .focus-letter {
             color: var(--accent-color);
             text-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
             animation: letterGlow 2s ease-in-out infinite alternate;
+            display: inline-block;
+            width: 0.6em;
+            text-align: center;
+            position: relative;
+            font-weight: bold;
+        }
+
+        /* ORP Marker - vertikale Linie zur Orientierung */
+        .orp-marker {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 2px;
+            height: 60px;
+            background: linear-gradient(to bottom, 
+                transparent,
+                rgba(255, 215, 0, 0.2) 20%,
+                rgba(255, 215, 0, 0.2) 80%,
+                transparent);
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 1;
         }
 
         @keyframes letterGlow {
@@ -754,9 +820,20 @@
                 </label>
                 <input type="range" id="font-slider" min="3" max="8" value="5" step="0.5">
             </div>
+
+            <div class="control-group">
+                <label for="orp-toggle">
+                    ORP-Fixierung (Optimal Recognition Point)
+                    <input type="checkbox" id="orp-toggle" checked style="margin-left: 10px; width: 20px; height: 20px; cursor: pointer;">
+                </label>
+                <div style="font-size: 0.9em; color: var(--text-secondary); margin-top: 5px;">
+                    Fixiert den optimalen Erkennungspunkt jedes Wortes an derselben Position für schnelleres Lesen
+                </div>
+            </div>
         </div>
 
         <div class="reader-display" id="reader-display">
+            <div class="orp-marker" id="orp-marker"></div>
             <div class="word-display" id="word-display">Bereit zum Starten...</div>
         </div>
 
@@ -853,6 +930,7 @@
         let chapters = []; // Store chapter information
         let selectedChapters = []; // Store selected chapter indices
         let selectionMode = 'all'; // 'all', 'single', 'multiple'
+        let useORP = true; // ORP-Fixierung ein/aus
 
         // DOM elements
         const fileInput = document.getElementById('file-input');
@@ -878,6 +956,7 @@
         const timeRemainingStat = document.getElementById('time-remaining');
         const currentWpmStat = document.getElementById('current-wpm');
         const loading = document.getElementById('loading');
+        const orpToggle = document.getElementById('orp-toggle');
 
         // Update slider backgrounds
         function updateSliderBackground(slider) {
@@ -1295,13 +1374,19 @@
             buttonGroup.style.display = 'flex';
             progressContainer.classList.add('active');
 
+            // Setze ORP-Marker Sichtbarkeit
+            const orpMarker = document.getElementById('orp-marker');
+            if (orpMarker) {
+                orpMarker.style.display = useORP ? 'block' : 'none';
+            }
+
             totalWordsStat.textContent = words.length.toLocaleString();
             currentWpmStat.textContent = wordsPerMinute;
             updateStats();
             displayWord();
         }
 
-        // Display word with enhanced visual effects
+        // Display word with ORP (Optimal Recognition Point) at fixed position
         function displayWord() {
             if (currentIndex >= words.length) {
                 stop();
@@ -1315,24 +1400,65 @@
 
             const text = chunk.join(' ');
             
-            // Apply focus letter highlighting with animation
-            if (wordsPerChunk === 1 && text.length > 1) {
-                const focusIndex = Math.floor(text.length * 0.3);
-                const highlighted = text.substring(0, focusIndex) + 
-                    '<span class="focus-letter">' + text[focusIndex] + '</span>' + 
-                    text.substring(focusIndex + 1);
-                wordDisplay.innerHTML = highlighted;
-                
-                // Add animation effect
-                wordDisplay.style.animation = 'none';
-                setTimeout(() => {
-                    wordDisplay.style.animation = 'textGlow 2s ease-in-out infinite alternate';
-                }, 10);
+            // Bei mehreren Wörtern oder wenn ORP deaktiviert: normale Anzeige
+            if (wordsPerChunk > 1 || !useORP) {
+                // Klassische zentrierte Anzeige
+                if (wordsPerChunk === 1 && text.length > 1) {
+                    const focusIndex = Math.floor(text.length * 0.3);
+                    const highlighted = text.substring(0, focusIndex) + 
+                        '<span class="focus-letter">' + text[focusIndex] + '</span>' + 
+                        text.substring(focusIndex + 1);
+                    wordDisplay.innerHTML = highlighted;
+                } else {
+                    wordDisplay.innerHTML = text;
+                }
             } else {
-                wordDisplay.textContent = text;
+                // RSVP mit fixem ORP für einzelne Wörter
+                displayWordWithORP(text);
             }
 
             updateStats();
+        }
+
+        // Zeige Wort mit ORP an fixer Position
+        function displayWordWithORP(word) {
+            // Bestimme den ORP (Optimal Recognition Point)
+            let orpIndex;
+            const wordLength = word.length;
+            
+            // ORP-Berechnung basierend auf Wortlänge (übliche RSVP-Formel)
+            if (wordLength <= 1) {
+                orpIndex = 0;
+            } else if (wordLength <= 5) {
+                // Bei kurzen Wörtern: Mitte
+                orpIndex = Math.floor((wordLength - 1) / 2);
+            } else if (wordLength <= 9) {
+                // Bei mittleren Wörtern: leicht links der Mitte
+                orpIndex = Math.floor(wordLength * 0.4);
+            } else {
+                // Bei langen Wörtern: etwa bei 35%
+                orpIndex = Math.floor(wordLength * 0.35);
+            }
+            
+            // Teile das Wort in drei Teile
+            const before = word.substring(0, orpIndex);
+            const focus = word[orpIndex] || '';
+            const after = word.substring(orpIndex + 1);
+            
+            // Erstelle HTML mit fixer ORP-Position
+            wordDisplay.innerHTML = `
+                <div class="word-container">
+                    <span class="word-part before">${before}</span>
+                    <span class="focus-letter">${focus}</span>
+                    <span class="word-part after">${after}</span>
+                </div>
+            `;
+            
+            // Animation hinzufügen
+            wordDisplay.style.animation = 'none';
+            setTimeout(() => {
+                wordDisplay.style.animation = 'textGlow 2s ease-in-out infinite alternate';
+            }, 10);
         }
 
         // Update statistics with animations
@@ -1483,6 +1609,24 @@
             const size = e.target.value;
             fontValue.textContent = `${size}em`;
             wordDisplay.style.fontSize = `${size}em`;
+        });
+
+        // ORP Toggle
+        orpToggle.addEventListener('change', (e) => {
+            useORP = e.target.checked;
+            
+            // Zeige/Verstecke ORP-Marker
+            const orpMarker = document.getElementById('orp-marker');
+            if (orpMarker) {
+                orpMarker.style.display = useORP ? 'block' : 'none';
+            }
+            
+            // Aktualisiere Anzeige wenn nicht am Spielen
+            if (!isPlaying && words.length > 0) {
+                displayWord();
+            }
+            
+            debugLog(`ORP-Fixierung ${useORP ? 'aktiviert' : 'deaktiviert'}`);
         });
 
         // Keyboard shortcuts
