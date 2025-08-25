@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Speed Reader - PDF & EPUB</title>
+    <title>Speed Reader Pro - PDF & EPUB</title>
     
     <!-- External Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -17,92 +17,258 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --dark-gradient: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.8);
+            --accent-color: #ffd700;
+            --success-color: #00ff88;
+            --danger-color: #ff006e;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             min-height: 100vh;
             display: flex;
-            flex-direction: column;
             align-items: center;
+            justify-content: center;
             padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+            transition: background 0.5s ease;
+        }
+
+        body.light-mode {
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        body.dark-mode {
+            background: var(--dark-gradient);
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Floating particles background */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            from {
+                transform: translateY(100vh) translateX(0) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            to {
+                transform: translateY(-100vh) translateX(100px) scale(1.5);
+                opacity: 0;
+            }
         }
 
         .container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            padding: 40px;
-            max-width: 900px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 30px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 
+                0 25px 50px -12px rgba(0, 0, 0, 0.25),
+                0 0 100px rgba(102, 126, 234, 0.1),
+                inset 0 0 30px rgba(255, 255, 255, 0.05);
+            padding: 50px;
+            max-width: 1000px;
             width: 100%;
-            backdrop-filter: blur(10px);
+            position: relative;
+            z-index: 10;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         h1 {
             text-align: center;
-            color: #333;
-            margin-bottom: 30px;
-            font-size: 2.5em;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--text-primary);
+            margin-bottom: 40px;
+            font-size: 3.5em;
+            font-weight: 900;
+            letter-spacing: -2px;
+            position: relative;
+            text-shadow: 0 0 30px rgba(102, 126, 234, 0.5);
+            animation: glow 2s ease-in-out infinite alternate;
         }
 
-        .upload-section {
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 30px;
-            margin-bottom: 30px;
-            border: 2px dashed #dee2e6;
+        @keyframes glow {
+            from { text-shadow: 0 0 30px rgba(102, 126, 234, 0.5); }
+            to { text-shadow: 0 0 40px rgba(102, 126, 234, 0.8), 0 0 60px rgba(102, 126, 234, 0.4); }
+        }
+
+        .emoji-icon {
+            display: inline-block;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Theme toggle */
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 50px;
+            padding: 10px 20px;
+            cursor: pointer;
             transition: all 0.3s ease;
+            color: var(--text-primary);
+            font-size: 1.5em;
+            z-index: 100;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1) rotate(10deg);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+        }
+
+        /* Upload section with animation */
+        .upload-section {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-radius: 25px;
+            padding: 40px;
+            margin-bottom: 30px;
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: rotate 10s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
 
         .upload-section.drag-over {
-            border-color: #667eea;
-            background: #f0f3ff;
-            transform: scale(1.02);
-        }
-
-        .file-input-wrapper {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
+            transform: scale(1.05);
+            border-color: var(--accent-color);
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 255, 255, 0.05));
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.3);
         }
 
         .file-input-label {
             display: inline-block;
-            padding: 12px 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 18px 40px;
+            background: var(--primary-gradient);
             color: white;
-            border-radius: 30px;
+            border-radius: 50px;
             cursor: pointer;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-weight: 700;
             font-size: 1.1em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .file-input-label::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .file-input-label:hover::before {
+            width: 300px;
+            height: 300px;
         }
 
         .file-input-label:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.4);
         }
 
-        input[type="file"] {
-            display: none;
-        }
-
-        .file-info {
-            text-align: center;
-            color: #666;
-            margin-top: 10px;
-        }
-
+        /* Animated controls */
         .controls {
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 30px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+            border-radius: 25px;
+            padding: 35px;
             margin-bottom: 30px;
             display: none;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: slideIn 0.6s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
 
         .controls.active {
@@ -110,208 +276,437 @@
         }
 
         .control-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
         label {
             display: block;
-            margin-bottom: 8px;
-            color: #555;
+            margin-bottom: 12px;
+            color: var(--text-secondary);
             font-weight: 600;
+            font-size: 0.95em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
+        /* Custom styled range slider */
         input[type="range"] {
             width: 100%;
-            height: 8px;
+            height: 10px;
             border-radius: 10px;
-            background: #dee2e6;
+            background: linear-gradient(90deg, 
+                var(--accent-color) 0%, 
+                var(--accent-color) var(--value), 
+                rgba(255, 255, 255, 0.1) var(--value), 
+                rgba(255, 255, 255, 0.1) 100%);
             outline: none;
             -webkit-appearance: none;
+            transition: background 0.3s;
         }
 
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 20px;
-            height: 20px;
+            width: 25px;
+            height: 25px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: radial-gradient(circle, var(--accent-color), #ff8c00);
             cursor: pointer;
-            transition: transform 0.2s;
+            box-shadow: 
+                0 0 20px rgba(255, 215, 0, 0.5),
+                0 5px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         input[type="range"]::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
+            transform: scale(1.3);
+            box-shadow: 
+                0 0 30px rgba(255, 215, 0, 0.7),
+                0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
         .value-display {
             display: inline-block;
-            margin-left: 10px;
-            padding: 5px 15px;
-            background: #667eea;
-            color: white;
-            border-radius: 20px;
-            font-weight: bold;
-            min-width: 80px;
+            margin-left: 15px;
+            padding: 8px 20px;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 255, 255, 0.1));
+            color: var(--accent-color);
+            border-radius: 25px;
+            font-weight: 700;
+            min-width: 100px;
             text-align: center;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            animation: pulse 2s infinite;
         }
 
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Main reader display */
         .reader-display {
-            background: #1a1a2e;
-            border-radius: 15px;
-            padding: 60px 40px;
+            background: linear-gradient(135deg, rgba(15, 12, 41, 0.9), rgba(48, 43, 99, 0.8));
+            border-radius: 30px;
+            padding: 80px 40px;
             margin-bottom: 30px;
-            min-height: 200px;
+            min-height: 300px;
             display: none;
             align-items: center;
             justify-content: center;
             position: relative;
+            overflow: hidden;
+            box-shadow: 
+                inset 0 0 50px rgba(0, 0, 0, 0.5),
+                0 0 100px rgba(102, 126, 234, 0.2);
+        }
+
+        .reader-display::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(255, 119, 198, 0.3) 0%, transparent 50%);
+            animation: nebula 20s ease-in-out infinite;
+        }
+
+        @keyframes nebula {
+            0%, 100% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.2); }
         }
 
         .reader-display.active {
             display: flex;
+            animation: fadeInScale 0.8s ease-out;
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
 
         #word-display {
-            font-size: 4em;
-            color: white;
-            font-weight: 300;
+            font-size: 5em;
+            color: var(--text-primary);
+            font-weight: 200;
             text-align: center;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
+            z-index: 1;
+            position: relative;
+            text-shadow: 
+                0 0 20px rgba(255, 255, 255, 0.5),
+                0 0 40px rgba(255, 255, 255, 0.3);
+            animation: textGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes textGlow {
+            from { 
+                text-shadow: 
+                    0 0 20px rgba(255, 255, 255, 0.5),
+                    0 0 40px rgba(255, 255, 255, 0.3);
+            }
+            to { 
+                text-shadow: 
+                    0 0 30px rgba(255, 255, 255, 0.7),
+                    0 0 60px rgba(255, 255, 255, 0.4),
+                    0 0 80px rgba(255, 215, 0, 0.2);
+            }
         }
 
         .focus-letter {
-            color: #ffd700;
-            font-weight: 600;
+            color: var(--accent-color);
+            font-weight: 700;
+            animation: focusPulse 0.5s ease-out;
+            text-shadow: 
+                0 0 30px rgba(255, 215, 0, 0.8),
+                0 0 50px rgba(255, 215, 0, 0.5);
         }
 
+        @keyframes focusPulse {
+            0% { transform: scale(1.5); opacity: 0.5; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Animated buttons */
         .button-group {
             display: flex;
-            gap: 15px;
+            gap: 20px;
             justify-content: center;
             flex-wrap: wrap;
+            margin-bottom: 30px;
         }
 
         button {
-            padding: 12px 30px;
+            padding: 15px 35px;
             border: none;
-            border-radius: 30px;
+            border-radius: 50px;
             font-size: 1em;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
-            transition: all 0.3s ease;
-            background: white;
-            color: #667eea;
-            border: 2px solid #667eea;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            color: var(--text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        button:hover::before {
+            width: 300px;
+            height: 300px;
         }
 
         button:hover {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 
+                0 15px 30px rgba(0, 0, 0, 0.2),
+                0 0 30px rgba(255, 255, 255, 0.1);
+        }
+
+        button:active {
+            transform: translateY(-1px) scale(1.02);
+        }
+
+        button.primary {
+            background: var(--primary-gradient);
+            border: none;
+            box-shadow: 
+                0 10px 30px rgba(102, 126, 234, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        button.primary:hover {
+            box-shadow: 
+                0 15px 40px rgba(102, 126, 234, 0.4),
+                0 0 50px rgba(102, 126, 234, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
         }
 
         button:disabled {
             opacity: 0.5;
             cursor: not-allowed;
+            transform: none;
         }
 
-        button.primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
+        /* Progress bar with gradient animation */
+        .progress-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 25px;
+            padding: 25px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: none;
+        }
+
+        .progress-container.active {
+            display: block;
+            animation: slideIn 0.6s ease-out;
         }
 
         .progress-bar {
             width: 100%;
-            height: 6px;
-            background: #dee2e6;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 10px;
             overflow: hidden;
-            margin-top: 20px;
+            position: relative;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
         }
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(90deg, 
+                #00ff88 0%, 
+                #00ffff 25%, 
+                #ff00ff 50%, 
+                #ffff00 75%, 
+                #00ff88 100%);
+            background-size: 200% 100%;
             width: 0%;
-            transition: width 0.3s ease;
+            transition: width 0.5s ease;
+            animation: progressAnimation 3s linear infinite;
+            box-shadow: 
+                0 0 20px rgba(0, 255, 136, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
         }
 
+        @keyframes progressAnimation {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+
+        /* Stats with glassmorphism */
         .stats {
             display: flex;
             justify-content: space-around;
-            margin-top: 20px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
+            gap: 20px;
+            flex-wrap: wrap;
         }
 
         .stat-item {
+            flex: 1;
+            min-width: 150px;
             text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08));
         }
 
         .stat-value {
-            font-size: 1.5em;
-            font-weight: bold;
-            color: #667eea;
+            font-size: 2em;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-color), #ff8c00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 5px;
         }
 
         .stat-label {
-            color: #666;
+            color: var(--text-secondary);
             font-size: 0.9em;
-            margin-top: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
         }
 
+        /* Loading animation */
         .loading {
             display: none;
             text-align: center;
-            padding: 20px;
-            color: #667eea;
+            padding: 30px;
+            color: var(--text-primary);
             font-weight: 600;
+            font-size: 1.2em;
         }
 
         .loading.active {
             display: block;
         }
 
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            margin: 20px auto;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
 
-        .loading.active::after {
-            content: '...';
-            animation: pulse 1.5s infinite;
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 2.5em;
+            }
+
+            #word-display {
+                font-size: 3em;
+            }
+
+            .button-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+
+        /* Glow effect for important elements */
+        .glow {
+            animation: glowEffect 2s ease-in-out infinite;
+        }
+
+        @keyframes glowEffect {
+            0%, 100% {
+                box-shadow: 
+                    0 0 20px rgba(255, 215, 0, 0.5),
+                    0 0 40px rgba(255, 215, 0, 0.3);
+            }
+            50% {
+                box-shadow: 
+                    0 0 30px rgba(255, 215, 0, 0.7),
+                    0 0 60px rgba(255, 215, 0, 0.5);
+            }
         }
     </style>
 </head>
-<body>
+<body class="light-mode">
+    <!-- Particle effect -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Theme toggle -->
+    <div class="theme-toggle" id="theme-toggle">🌙</div>
+
     <div class="container">
-        <h1>⚡ Speed Reader</h1>
+        <h1><span class="emoji-icon">⚡</span> Speed Reader Pro</h1>
         
         <div class="upload-section" id="upload-section">
-            <div class="file-input-wrapper">
+            <div class="file-input-wrapper" style="text-align: center;">
                 <label for="file-input" class="file-input-label">
-                    📚 PDF oder EPUB auswählen
+                    📚 PDF oder EPUB laden
                 </label>
-                <input type="file" id="file-input" accept=".pdf,.epub">
-                <div class="file-info">
-                    Oder Datei hier hineinziehen
+                <input type="file" id="file-input" accept=".pdf,.epub" style="display: none;">
+                <div class="file-info" style="margin-top: 20px; color: var(--text-secondary);">
+                    <p>Ziehe deine Datei hierher oder klicke zum Auswählen</p>
+                    <p style="font-size: 0.9em; margin-top: 10px;">Unterstützte Formate: PDF, EPUB</p>
                 </div>
             </div>
         </div>
 
         <div class="loading" id="loading">
-            Datei wird verarbeitet
+            <div class="loading-spinner"></div>
+            Datei wird verarbeitet...
         </div>
 
         <div class="controls" id="controls">
             <div class="control-group">
                 <label for="speed-slider">
-                    Lesegeschwindigkeit (Wörter pro Minute)
+                    Geschwindigkeit
                     <span class="value-display" id="speed-value">300 WPM</span>
                 </label>
                 <input type="range" id="speed-slider" min="100" max="1000" value="300" step="50">
@@ -328,44 +723,81 @@
             <div class="control-group">
                 <label for="font-slider">
                     Schriftgröße
-                    <span class="value-display" id="font-value">4em</span>
+                    <span class="value-display" id="font-value">5em</span>
                 </label>
-                <input type="range" id="font-slider" min="2" max="8" value="4" step="0.5">
+                <input type="range" id="font-slider" min="3" max="8" value="5" step="0.5">
             </div>
         </div>
 
         <div class="reader-display" id="reader-display">
-            <div id="word-display">Bereit zum Lesen</div>
+            <div id="word-display">Bereit zum Lesen ✨</div>
         </div>
 
         <div class="button-group" id="button-group" style="display: none;">
-            <button id="play-pause-btn" class="primary">▶️ Start</button>
-            <button id="reset-btn">⏮️ Neustart</button>
-            <button id="skip-back-btn">⏪ -10 Wörter</button>
-            <button id="skip-forward-btn">⏩ +10 Wörter</button>
+            <button id="play-pause-btn" class="primary">▶️ START</button>
+            <button id="reset-btn">⏮️ NEUSTART</button>
+            <button id="skip-back-btn">⏪ -10</button>
+            <button id="skip-forward-btn">⏩ +10</button>
         </div>
 
-        <div class="progress-bar" id="progress-bar" style="display: none;">
-            <div class="progress-fill" id="progress-fill"></div>
-        </div>
-
-        <div class="stats" id="stats" style="display: none;">
-            <div class="stat-item">
-                <div class="stat-value" id="words-read">0</div>
-                <div class="stat-label">Wörter gelesen</div>
+        <div class="progress-container" id="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
             </div>
-            <div class="stat-item">
-                <div class="stat-value" id="total-words">0</div>
-                <div class="stat-label">Gesamt</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" id="time-remaining">0:00</div>
-                <div class="stat-label">Verbleibende Zeit</div>
+            
+            <div class="stats" style="margin-top: 25px;">
+                <div class="stat-item">
+                    <div class="stat-value" id="words-read">0</div>
+                    <div class="stat-label">Gelesen</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="total-words">0</div>
+                    <div class="stat-label">Gesamt</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="time-remaining">0:00</div>
+                    <div class="stat-label">Verbleibend</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="current-wpm">0</div>
+                    <div class="stat-label">WPM</div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
+        // Create particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 50;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+        createParticles();
+
+        // Theme toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+        let isDarkMode = false;
+
+        themeToggle.addEventListener('click', () => {
+            isDarkMode = !isDarkMode;
+            body.className = isDarkMode ? 'dark-mode' : 'light-mode';
+            themeToggle.textContent = isDarkMode ? '☀️' : '🌙';
+            themeToggle.style.transform = 'scale(1.2) rotate(360deg)';
+            setTimeout(() => {
+                themeToggle.style.transform = 'scale(1) rotate(0deg)';
+            }, 300);
+        });
+
         // Set PDF.js worker
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
@@ -394,15 +826,33 @@
         const chunkValue = document.getElementById('chunk-value');
         const fontSlider = document.getElementById('font-slider');
         const fontValue = document.getElementById('font-value');
-        const progressBar = document.getElementById('progress-bar');
+        const progressContainer = document.getElementById('progress-container');
         const progressFill = document.getElementById('progress-fill');
-        const stats = document.getElementById('stats');
         const wordsReadStat = document.getElementById('words-read');
         const totalWordsStat = document.getElementById('total-words');
         const timeRemainingStat = document.getElementById('time-remaining');
+        const currentWpmStat = document.getElementById('current-wpm');
         const loading = document.getElementById('loading');
 
-        // Drag and drop
+        // Update slider backgrounds
+        function updateSliderBackground(slider) {
+            const min = slider.min;
+            const max = slider.max;
+            const val = slider.value;
+            const percentage = ((val - min) / (max - min)) * 100;
+            slider.style.setProperty('--value', percentage + '%');
+        }
+
+        speedSlider.addEventListener('input', () => updateSliderBackground(speedSlider));
+        chunkSlider.addEventListener('input', () => updateSliderBackground(chunkSlider));
+        fontSlider.addEventListener('input', () => updateSliderBackground(fontSlider));
+
+        // Initialize sliders
+        updateSliderBackground(speedSlider);
+        updateSliderBackground(chunkSlider);
+        updateSliderBackground(fontSlider);
+
+        // Drag and drop with visual feedback
         uploadSection.addEventListener('dragover', (e) => {
             e.preventDefault();
             uploadSection.classList.add('drag-over');
@@ -433,6 +883,7 @@
             const fileType = file.name.split('.').pop().toLowerCase();
             
             loading.classList.add('active');
+            uploadSection.style.display = 'none';
             
             try {
                 if (fileType === 'pdf') {
@@ -441,6 +892,7 @@
                     await processEPUB(file);
                 } else {
                     alert('Bitte wählen Sie eine PDF- oder EPUB-Datei aus.');
+                    uploadSection.style.display = 'block';
                     loading.classList.remove('active');
                     return;
                 }
@@ -449,6 +901,7 @@
             } catch (error) {
                 console.error('Fehler beim Verarbeiten der Datei:', error);
                 alert('Fehler beim Laden der Datei. Bitte versuchen Sie es erneut.');
+                uploadSection.style.display = 'block';
             } finally {
                 loading.classList.remove('active');
             }
@@ -506,21 +959,22 @@
         function initializeReader() {
             if (words.length === 0) {
                 alert('Keine Wörter gefunden.');
+                uploadSection.style.display = 'block';
                 return;
             }
 
             controls.classList.add('active');
             readerDisplay.classList.add('active');
             buttonGroup.style.display = 'flex';
-            progressBar.style.display = 'block';
-            stats.style.display = 'flex';
+            progressContainer.classList.add('active');
 
-            totalWordsStat.textContent = words.length;
+            totalWordsStat.textContent = words.length.toLocaleString();
+            currentWpmStat.textContent = wordsPerMinute;
             updateStats();
             displayWord();
         }
 
-        // Display word with focus letter
+        // Display word with enhanced visual effects
         function displayWord() {
             if (currentIndex >= words.length) {
                 stop();
@@ -534,13 +988,19 @@
 
             const text = chunk.join(' ');
             
-            // Apply focus letter highlighting (ORP - Optimal Recognition Point)
+            // Apply focus letter highlighting with animation
             if (wordsPerChunk === 1 && text.length > 1) {
                 const focusIndex = Math.floor(text.length * 0.3);
                 const highlighted = text.substring(0, focusIndex) + 
                     '<span class="focus-letter">' + text[focusIndex] + '</span>' + 
                     text.substring(focusIndex + 1);
                 wordDisplay.innerHTML = highlighted;
+                
+                // Add animation effect
+                wordDisplay.style.animation = 'none';
+                setTimeout(() => {
+                    wordDisplay.style.animation = 'textGlow 2s ease-in-out infinite alternate';
+                }, 10);
             } else {
                 wordDisplay.textContent = text;
             }
@@ -548,9 +1008,10 @@
             updateStats();
         }
 
-        // Update statistics
+        // Update statistics with animations
         function updateStats() {
-            wordsReadStat.textContent = currentIndex;
+            const wordsRead = currentIndex;
+            wordsReadStat.textContent = wordsRead.toLocaleString();
             
             const wordsRemaining = words.length - currentIndex;
             const minutesRemaining = wordsRemaining / wordsPerMinute;
@@ -562,14 +1023,15 @@
             progressFill.style.width = `${progress}%`;
         }
 
-        // Play/Pause
+        // Play/Pause with smooth transitions
         function play() {
             if (currentIndex >= words.length) {
                 currentIndex = 0;
             }
 
             isPlaying = true;
-            playPauseBtn.textContent = '⏸️ Pause';
+            playPauseBtn.textContent = '⏸️ PAUSE';
+            playPauseBtn.classList.add('glow');
             
             const interval = (60 * 1000) / (wordsPerMinute / wordsPerChunk);
             
@@ -587,19 +1049,51 @@
 
         function pause() {
             isPlaying = false;
-            playPauseBtn.textContent = '▶️ Weiter';
+            playPauseBtn.textContent = '▶️ WEITER';
+            playPauseBtn.classList.remove('glow');
             clearInterval(intervalId);
         }
 
         function stop() {
             isPlaying = false;
-            playPauseBtn.textContent = '▶️ Start';
+            playPauseBtn.textContent = '▶️ START';
+            playPauseBtn.classList.remove('glow');
             clearInterval(intervalId);
             
             if (currentIndex >= words.length) {
-                wordDisplay.textContent = 'Fertig! 🎉';
+                wordDisplay.innerHTML = 'Fertig! 🎉';
                 currentIndex = words.length;
                 updateStats();
+                
+                // Celebration animation
+                confetti();
+            }
+        }
+
+        // Simple confetti effect
+        function confetti() {
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff'];
+            for (let i = 0; i < 50; i++) {
+                const confettiPiece = document.createElement('div');
+                confettiPiece.style.position = 'fixed';
+                confettiPiece.style.width = '10px';
+                confettiPiece.style.height = '10px';
+                confettiPiece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confettiPiece.style.left = Math.random() * 100 + '%';
+                confettiPiece.style.top = '-10px';
+                confettiPiece.style.transform = `rotate(${Math.random() * 360}deg)`;
+                confettiPiece.style.transition = 'all 2s ease-out';
+                document.body.appendChild(confettiPiece);
+                
+                setTimeout(() => {
+                    confettiPiece.style.top = '100vh';
+                    confettiPiece.style.transform = `rotate(${Math.random() * 720}deg)`;
+                    confettiPiece.style.opacity = '0';
+                }, 100);
+                
+                setTimeout(() => {
+                    confettiPiece.remove();
+                }, 2100);
             }
         }
 
@@ -616,7 +1110,7 @@
             pause();
             currentIndex = 0;
             displayWord();
-            playPauseBtn.textContent = '▶️ Start';
+            playPauseBtn.textContent = '▶️ START';
         });
 
         skipBackBtn.addEventListener('click', () => {
@@ -632,6 +1126,7 @@
         speedSlider.addEventListener('input', (e) => {
             wordsPerMinute = parseInt(e.target.value);
             speedValue.textContent = `${wordsPerMinute} WPM`;
+            currentWpmStat.textContent = wordsPerMinute;
             
             if (isPlaying) {
                 pause();
@@ -659,7 +1154,7 @@
             wordDisplay.style.fontSize = `${size}em`;
         });
 
-        // Keyboard shortcuts
+        // Enhanced keyboard shortcuts
         document.addEventListener('keydown', (e) => {
             if (!words.length) return;
 
@@ -687,6 +1182,14 @@
                 case 'ArrowDown':
                     speedSlider.value = Math.max(100, parseInt(speedSlider.value) - 50);
                     speedSlider.dispatchEvent(new Event('input'));
+                    break;
+                case 'r':
+                case 'R':
+                    currentIndex = 0;
+                    displayWord();
+                    break;
+                case 'Escape':
+                    if (isPlaying) pause();
                     break;
             }
         });
